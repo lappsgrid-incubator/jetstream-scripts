@@ -1,0 +1,389 @@
+#!/bin/bash
+set -e
+
+# Script for managing VM instances on Jetstream with the OpenStack command
+# line tools.
+
+# Set PEM to the location of the lappsgrid-shared-key. Possession of this key
+# allows the user to manage instances on Jetstream.
+PEM=$HOME/.ssh/lappsgrid-shared-key.pem
+
+# This will never need to be changed... until it needs to be changed.
+# This is the IP used for several *.lappsgrid.org addresses and only needs
+# to be changed when the DNS entries are changed.
+PROXY=149.165.168.244
+
+if [ -z "$OS_USERNAME" ] ; then
+	echo "The OpenStack API has not been configured. Please source the openrc.sh"
+	echo "script and try again. One of the following might work:"
+	echo "source ~/openrc.sh"
+	echo "source ~/bin/openrc.sh"
+	exit 1	
+fi
+
+trap "echo 'Aborting due to an error (likely a missing parameter).'; exit 1" TERM
+export TOP_PID=$$
+
+# Use the abort function inside other functions when the entire jetstream script
+# should exit when an error is encountered.  That is:
+# function foo() {
+#     exit 1
+# }
+# causes the foo() function to return the error code 1, it will not terminate
+# the script.
+# function foo() {
+#     abort "Something bad happened."
+# }
+# causes the script to terminate.
+function abort() {
+   ERROR_MESSAGE=$1
+   kill -s TERM $TOP_PID
+}
+
+# ANSI color codes for the console.
+reset="\033[0m"
+bold="\033[1m"
+ital="\033[3m" # does not work on OS X
+
+# Function used to highlight text.
+function hi() {
+    echo -e "$bold$1$reset"
+}
+
+function em() {
+	# Italics does not work on my terminal... need to test on others.
+	#echo -e "$ital$1$reset"
+    echo -e "$bold$1$reset"
+}
+
+# The Lappsgrid images that are available on Jetstream.
+UBUNTU_IMAGE=d7fe3289-943f-4417-90e8-8a6b171677ca
+DOCKER_IMAGE=f3847d59-6a90-43da-8666-b58699398b9a
+MASTER_IMAGE=f9e0fa21-6cad-49fc-97db-efd3812fc199
+
+# Default values used when launching an image.
+IMAGE=$UBUNTU_IMAGE
+FLAVOR="m1.medium"
+KEY="lappsgrid-shared-key"
+GROUP="lappsgrid-secgroup"
+NETWORK="lappsgrid-network"
+
+# 
+# Prints the help screen for the user.
+#
+function usage {
+	if [ -n $1 ] ; then
+		echo "$1" | cat -
+		echo | cat -
+	fi
+	cat << EOF
+$(hi NAME) 
+    $(hi jetstream) -- Manage instances on Jetstream via the OpenStack API
+
+$(hi SYNOPSIS)
+    $(hi jetstream) COMMAND [$(hi options)]
+
+$(hi DESCRIPTION)	
+    The $(em jetstream) script uses the OpenStack API ($(em nova), $(em glance), $(em neutron), etc.)
+    to manage instances running on Jetstream (http://jblb.jetstream-cloud.org/dashboard).
+
+$(hi COMMANDS)	
+    $(hi launch) [options] <instance_name> 
+        Launches a new instance using the default network ($(em lappsgrid-network)), 
+        security group ($(em lappsgrid-secgroup)), and SSH key ($(em lappsgrid-shared-key))
+	    
+    $(hi list)
+        Lists all instances currently allocated, including suspended and stopped instances.
+	    
+    $(hi suspend) <name>
+        Suspends an instance.
+	    
+    $(hi resume) <name>
+        Resumes an instance.
+	    
+    $(hi stop) <name>
+        Stops an instances.
+	    
+    $(hi delete) <name>
+        Deletes an instance.  All data in memory and on disk will be lost.
+	    
+    $(hi visit) [<instance_name>|<ip address>]
+        Opens the instance, or IP address, in the default web browser. 
+        Mac OS X only.
+        
+    $(hi offline)
+        Disables the Jetstream proxy. When users attempt to access 
+        http://jetstream.lappsgrid.org the proxy will display a static html page
+        stating that the Jetstream instance is offline to preserve resources.
+        
+    $(hi online) 
+        Causes the proxy server to resume forwarding http://jetstream.lappsgrid.org
+        traffic to the configured address.
+        
+    $(hi proxy) <ip address>
+        Reconfigures the proxy to forward http://jetstream.lappsgrid.org traffic to
+        the specified IP address.  The address does not have to be a public ip 
+        address, that is, the proxy can forward to 10.x.x.x, 192.168.x.x, etc. 
+        provided the proxy and server are on the same subnet.
+        
+    $(hi ssh) <ip address | name>
+        Connects to the Jetstream instance via ssh.  The name or IP address of the
+        instance can be specified.  If the name is provided the script will attempt
+        to parse IP address from the output of the `nova list` command.
+            
+    $(hi help)
+        Displays this help message.
+	
+$(hi OPTIONS) 
+    $(hi -t)|$(hi --tiny)	
+        Launches a tiny instance (1x2)
+	
+    $(hi -s)|$(hi --small)	
+        Launches a small instance (2x4)
+
+    $(hi -m)|$(hi --medium)	
+        Launches a medium instance (6x16)
+
+    $(hi -l)|$(hi --large)	
+        Launches a large instance (10x30)
+
+    $(hi -x)|$(hi --xlarge)
+        Launches an extra large instace (24x60)
+        
+    $(hi -n)|$(hi --name) <name>
+        Specifies the name for the instance.  The name will be prefixed with $(em lappsgrid-) 
+        if it is not already.
+					
+    $(hi --ip) [assign|<ip address>]	
+        Allocates an floating ip address and associates it with the new instance or 
+        associates the provided IP with the new instance.  If an IP address is
+        provided then it must have been allocated previously.
+	    
+    $(hi -i)|$(hi --image) [ubuntu|docker|manager]
+        The VM image to be used for the instance.  Valid options are:
+        $(hi ubuntu) Default Ubuntu 14.04.3 Development image.
+        $(hi docker) Ubuntu image with Docker and Docker Compose.
+        $(hi master) Ubuntu image with Docker, Compose, and Lappsgrid tools.
+	
+$(hi EXAMPLES)
+
+$(hi '$>') jetstream launch -t --ip assign test-instance
+    Creates a new tiny instance named $(hi lappsgrid-test-instance) and allocates a 
+    public floating IP address.
+
+$(hi '$>') jetstream launch lappsgrid-test
+    Create a medium instance (the default) named $(hi lappsgrid-test).  The instance 
+    will not have a public IP address.
+
+$(hi '$>') jetstream suspend test
+    Suspends the instance named $(hi lappsgrid-test)
+
+Press $(hi Q) to exit help.
+
+EOF
+}
+
+# The `help` function pipes the output from the usage function through `less`
+# for proper pagination.
+function help { 
+	usage "$1" | less -R
+}
+
+# Launch an instance on Jetstream.
+function launch() {
+	NAME=
+	IP=
+	while [ -n "$1" ] ; do
+		case $1 in
+			-t|--tiny) FLAVOR="m1.tiny" ;;
+			-s|--small) FLAVOR="m1.small" ;;
+			-m|--medium) FLAVOR="m1.medium" ;;
+			-l|--large) FLAVOR="m1.large" ;;
+			-x|--xlarge) FLAVOR="m1.xlarge" ;;
+			-n|--name)
+				if [ -z "$2" ] ; then
+					help "ERROR: No name specified!"
+					exit 1
+				fi
+				NAME=lappsgrid-$2
+				shift
+				;;
+			--ip)
+				if [ -z "$2" ] ; then
+					help "ERROR: No IP address provided."
+					exit 1
+				fi
+				IP=$2
+				shift
+				if [[ "$IP" == "assign" ]] ; then
+					echo "Getting a floating IP address."
+					IP=`nova floating-ip-create public | tail -2 | head -1 | awk '{print $4}'`
+					echo $IP
+				fi
+				;;
+			-i|--image)
+				if [ -z "$2" ] ; then
+					echo "ERROR: No image name provided."
+					exit 1
+				fi
+				case $2 in
+					docker) IMAGE=$DOCKER_IMAGE ;;
+					ubuntu) IMAGE=$UBUNTU_IMAGE ;;
+					master) IMAGE=$MASTER_IMAGE ;;
+					*) 
+						echo "Invalid image name $2"
+						echo "Expected one of ubuntu, docker, or master"
+						exit 1
+					;;
+				esac
+				shift
+				;;
+			*)
+				if [ -n "$NAME" ] ; then
+					#echo "ERROR: Unknown option $1"
+					echo "The name has already been set: $NAME"
+					exit 1
+				fi
+				NAME=$(get_name $1)
+				;;
+		esac
+		shift
+	done
+	if [ -z $NAME ] ; then
+		echo "ERROR: No name specified for the instance."
+		exit 1
+	fi
+	echo "Launching instance $NAME ($FLAVOR)"
+	nova boot $NAME \
+		--flavor $FLAVOR \
+		--image $IMAGE \
+		--key-name $KEY \
+		--security-groups $GROUP \
+		--nic net-name=$NETWORK
+		
+	#ip=`nova floating-ip-create public | tail -2 | head -1 | awk '{print $2}'`
+	#nova floating-ip-associate $NAME $ip
+	if [ -n "$IP" ] ; then
+		echo "Assigning $IP to $NAME"
+		sleep 5
+		nova floating-ip-associate $NAME $IP
+		
+		echo "To enable ssh from this instance to other instances run the"
+		echo "following command once the instance is up and responding:"
+		echo "scp -i $PEM $PEM root@$IP:/root/.ssh/id_rsa"
+	fi
+	
+}
+
+function get_name() {
+	if [ -z "$1" ] ; then
+		#echo "ERROR: No instance name provided."
+		#exit 1
+		ERROR="ERROR: No instance name provided."
+		abort 
+	fi
+	if [[ $1 == lappsgrid* ]] ; then
+		echo $1
+	else
+		echo lappsgrid-$1
+	fi
+}
+
+function run_command() {
+	local CMD=$1
+	local ACTION=$2
+	local NAME=$(get_name $3) 
+	echo "$ACTION instance: $NAME"
+	nova $CMD $NAME
+}
+
+function is_ip_address() {
+	local pat='[1-9][0-9]{0,2}'
+	if [[ $1 =~ ^$pat\.$pat\.$pat\.$pat$ ]] ; then
+		exit 0
+	fi
+	exit 1
+}
+
+# Main program starts here.
+case $1 in
+	list)
+		nova list
+		;;
+	launch)
+		shift
+		launch $@
+		;;
+	suspend)
+		run_command suspend 'Suspending' $2 || exit 1
+		;;
+	resume)
+		run_command resume 'Resuming' $2
+		;;
+	stop)
+		run_command stop 'Stopping' $2
+		;;
+	delete)
+	    if [[ $2 == *proxy* ]] ; then
+	    	echo "ERROR: Can not delete a proxy with this program."
+	    	exit 1
+	    fi
+		run_command delete 'Deleting' $2
+		;;
+	offline)
+		ssh -i $PEM root@$PROXY proxy offline
+		;;
+	online)
+		ssh -i $PEM root@$PROXY proxy online
+		;;
+	proxy)
+		if [ -z $2 ] ; then
+			echo "ERROR: No IP address specified"
+			exit 1
+		fi
+		ssh -i $PEM root@$PROXY proxy server $2
+		;;
+	ssh)
+		IP=
+		if $(is_ip_address "$2") ; then
+			IP=$2
+		else
+			# If the user didn't specify the ip address we will
+			# have to grep it out of the `nova list` output.
+			# Parsing the 2nd to last element is much easier if
+			# we reverse the input and just find the 2nd element.
+			IP=`nova list | grep "$2" | rev | awk '{print $2}' | rev`
+		fi
+		echo "Connecting to $IP"
+		ssh -i $PEM root@$IP
+		;;
+	visit)
+		if [[ $(uname) != Darwin ]] ; then
+			echo "This command has only been tested on OS X and"
+			echo "is unlikely to work on Linux distributions."
+			echo -e "Press $(hi ENTER) to continue."
+			read
+		fi
+		IP=
+		if $(is_ip_address "$2") ; then
+			IP=$2
+		else
+			IP=`nova list | grep "$2" | rev | awk '{print $2}' | rev`
+		fi
+		echo "Opening $IP in a web browser"
+		open http://$IP
+		;;
+	help)
+		help
+		;;
+	*)
+		help "ERROR: Unknown command"
+		;;
+esac
+
+#nova boot ${OS_PROJECT_NAME}-api-U-1 \
+#--flavor m1.medium \
+#--image d7fe3289-943f-4417-90e8-8a6b171677ca \
+#--key-name ${OS_PROJECT_NAME}-api-key \
+#--security-groups global-ssh \
+#--nic net-name=${OS_PROJECT_NAME}-api-net
