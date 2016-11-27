@@ -47,7 +47,7 @@ ital="\033[3m" # does not work on OS X
 
 # Function used to highlight text.
 function hi() {
-    echo -e "$bold$1$reset"
+    echo -e "$bold$@$reset"
 }
 
 function em() {
@@ -129,7 +129,7 @@ $(hi COMMANDS)
     $(hi ssh) <ip address | name>
         Connects to the Jetstream instance via ssh.  The name or IP address of the
         instance can be specified.  If the name is provided the script will attempt
-        to parse IP address from the output of the `nova list` command.
+        to parse IP address from the output of the $(hi nova list) command.
             
     $(hi help)
         Displays this help message.
