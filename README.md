@@ -20,9 +20,12 @@ instances.
 - **vm-inialize.sh**<br/>
 Does all the work of initializing a new VM.  This script will install (amongst other
 things):
-- Java
-- Groovy
-- Zip, unzip, emacs, and other utils
-- Several Lappsgrid tools (lsd, jsonc, tool-config-editor, etc.)
+  - Java
+  - Groovy
+  - Zip, unzip, emacs, and other utils
+  - Several Lappsgrid tools (lsd, jsonc, tool-config-editor, etc.)
+- **install-*.sh**<br/>
+Install various packages individually. Use these scripts in install packages on an
+instance when the full `vm-initialize.sh` installs more than is needed or wanted.
 
 
