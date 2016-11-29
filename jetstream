@@ -109,7 +109,7 @@ $(hi COMMANDS)
 	    
     $(hi visit) [<instance_name>|<ip address>]
         Opens the instance, or IP address, in the default web browser. 
-        Mac OS X only.
+        Only tested on Mac OS X, but it may work on Linux and/or Windows.
         
     $(hi offline)
         Disables the Jetstream proxy. When users attempt to access 
@@ -125,6 +125,11 @@ $(hi COMMANDS)
         the specified IP address.  The address does not have to be a public ip 
         address, that is, the proxy can forward to 10.x.x.x, 192.168.x.x, etc. 
         provided the proxy and server are on the same subnet.
+      
+    $(hi scripts pull)
+        Does a $(hi git pull) from the /var/lib/downloads/scripts directory on
+        the proxy server.  Use this command to remotely update the scripts available
+        from http://downloads.lappsgrid.org/scripts
         
     $(hi ssh) <ip address | name>
         Connects to the Jetstream instance via ssh.  The name or IP address of the
@@ -357,10 +362,20 @@ case $1 in
 		echo "Connecting to $IP"
 		ssh -i $PEM root@$IP
 		;;
+	scripts)
+		case $2 in
+			pull)
+				ssh -i $PEM root@$PROXY cd /var/lib/downloads/scripts && git pull origin master
+				;;
+			*)
+				echo "Unknown option: $2"
+				;;
+		esac
+		;;
 	visit)
 		if [[ $(uname) != Darwin ]] ; then
 			echo "This command has only been tested on OS X and"
-			echo "is unlikely to work on Linux distributions."
+			echo "may not work on Windows or Linux distributions."
 			echo -e "Press $(hi ENTER) to continue."
 			read
 		fi
@@ -371,7 +386,18 @@ case $1 in
 			IP=`nova list | grep "$2" | rev | awk '{print $2}' | rev`
 		fi
 		echo "Opening $IP in a web browser"
-		open http://$IP
+		case "$OSTYPE" in
+		   cygwin*)
+			  open="cmd /c start"
+			  ;;
+		   linux*)
+			  open="xdg-open"
+			  ;;
+		   darwin*)
+			  open="open"
+			  ;;
+		esac		
+		$open http://$IP
 		;;
 	help)
 		help
