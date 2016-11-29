@@ -2,7 +2,7 @@
 
 # Commonly needed programs and utilities not included in the default images.
 
-function install() {
+function install {
 	cmd=$1
 	if [ -n $2 ] ; then
 		package=$2
