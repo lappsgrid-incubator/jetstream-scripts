@@ -365,7 +365,7 @@ case $1 in
 	scripts)
 		case $2 in
 			pull)
-				ssh -i $PEM root@$PROXY cd /var/lib/downloads/scripts && git pull origin master
+				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/scripts && pwd && git pull origin master"
 				;;
 			*)
 				echo "Unknown option: $2"
