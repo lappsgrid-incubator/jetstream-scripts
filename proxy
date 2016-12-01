@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Script run on the proxy server to update the Nginx configuation.
+# There are two configurations available by default:
+# /etc/nginx/sites-available/jetstream
+# /etc/nginx/sites-available/offline
+
+# The jetstream site forwards to the upstream server that is defined in
+# /etc/nginx/upstream.conf
+# The offline site serves a single index.html file from /var/lib/jetstream
+
+AVAILABLE=/etc/nginx/sites-available
+ENABLED=/etc/nginx/sites-enabled
+
+function enable() {
+    if [ ! -f $ENABLED/$1 ] ; then
+        echo "Linking $1"
+		ln -s $AVAILABLE/$1 $ENABLED/$1
+    fi
+}
+
+function disable() {
+    if [ -f $ENABLED/$1 ] ; then
+        rm $ENABLED/$1
+    fi
+}
+
+case $1 in
+	offline)
+		disable jetstream
+		enable offline
+		service nginx restart
+		;;
+    online)
+        disable offline
+		enable jetstream
+		service nginx restart
+    	;;
+    server)
+		port=$3
+		if [ -z $port ] ; then
+			port=8080
+		fi
+        cat << EOF > /etc/nginx/upstream.conf
+upstream galaxy {
+    server $2:$port;
+}
+EOF
+		echo "Proxy is now forwarding to $2"
+        ;;
+     *)
+         echo "ERROR: Unknown command $1"
+		 exit 1
+	 	;;
+esac
+
+	
