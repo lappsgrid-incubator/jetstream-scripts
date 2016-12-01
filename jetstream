@@ -346,7 +346,7 @@ case $1 in
 			echo "ERROR: No IP address specified"
 			exit 1
 		fi
-		ssh -i $PEM root@$PROXY proxy server $2
+		ssh -i $PEM root@$PROXY proxy server $2 $3
 		;;
 	ssh)
 		IP=
