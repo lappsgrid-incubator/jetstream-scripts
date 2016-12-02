@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 # This is the port that Galaxy will listen on.
 export PORT=80
@@ -8,6 +7,8 @@ curl -sSL http://downloads.lappsgrid.org/scripts/install-common.sh | sh
 curl -sSL http://downloads.lappsgrid.org/scripts/install-java.sh | sh
 curl -sSL http://downloads.lappsgrid.org/scripts/install-postgres.sh | sh
 curl -sSL http://downloads.lappsgrid.org/scripts/install-lsd.sh | sh
+
+set -e
 
 # Install Galaxy (checkout from GitHub).
 adduser galaxy --system --group
