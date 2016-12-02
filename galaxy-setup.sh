@@ -2,7 +2,7 @@
 set -e
 
 # This is the port that Galaxy will listen on.
-PORT=80
+export PORT=80
 
 curl -sSL http://downloads.lappsgrid.org/scripts/install-common.sh | sh
 curl -sSL http://downloads.lappsgrid.org/scripts/install-java.sh | sh
