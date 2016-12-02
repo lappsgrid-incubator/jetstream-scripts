@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 PORT=80
 
@@ -18,13 +19,13 @@ echo "PASSWORD: $PASSWORD"
 echo "SECRET  : $SECRET"
 
 curl -sSL http://downloads.lappsgrid.org/scripts/install-postgres.sh | sh
-curl -sSL http://downloads.lappsgrid.org/scripts/db-setup.sql | sed "s/__DB_PASSWORD__/$PASSWORD" | sudo -u postgres psql
+curl -sSL http://downloads.lappsgrid.org/scripts/db-setup.sql | sed "s/__DB_PASSWORD__/$PASSWORD/" | sudo -u postgres psql
 
 cd /home/galaxy/galaxy
 HOME=/home/galaxy sudo -u galaxy git checkout lapps
 
 wget http://downloads.lappsgrid.org/scripts/patch-galaxy-ini.sh
-chmod +x patch-galaxy.sh
+chmod +x patch-galaxy-ini.sh
 ./patch-galaxy-ini.sh /home/galaxy
 chown galaxy:galaxy /home/galaxy/galaxy/config/galaxy.ini
 
