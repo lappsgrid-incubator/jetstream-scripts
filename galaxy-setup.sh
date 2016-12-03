@@ -33,7 +33,7 @@ curl -sSL http://downloads.lappsgrid.org/scripts/db-setup.sql | sed "s/__DB_PASS
 cd /home/galaxy/galaxy
 git checkout lapps
 
-# Patch the galaxy.ini file with the port number , installation directory, database 
+# Patch the galaxy.ini file with the port number, installation directory, database 
 # password, and id_secret.
 wget http://downloads.lappsgrid.org/scripts/patch-galaxy-ini.sh
 chmod +x patch-galaxy-ini.sh
