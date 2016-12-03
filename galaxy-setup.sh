@@ -17,8 +17,8 @@ git clone http://github.com/lappsgrid-incubator/Galaxy.git galaxy
 git clone http://github.com/lappsgrid-incubator/GalaxyMods.git mods
 
 # Generate a random database password and ID secret for Galaxy
-PASSWORD=$(curl -sSL http://grid.anc.org:9080/password?length=24)
-SECRET=$(curl -sSL http://grid.anc.org:9080/password?length=32\&chars=abcdef0123456789)
+export PASSWORD=$(curl -sSL http://grid.anc.org:9080/password?length=24)
+export SECRET=$(curl -sSL http://grid.anc.org:9080/password?length=32\&chars=abcdef0123456789)
 
 # Save the database password in a safe location so the database can be accessed
 # later if needed.
