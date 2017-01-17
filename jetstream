@@ -120,7 +120,7 @@ $(hi COMMANDS)
         Causes the proxy server to resume forwarding http://jetstream.lappsgrid.org
         traffic to the configured address.
         
-    $(hi proxy) <ip address>
+    $(hi proxy) <ip address> [port]
         Reconfigures the proxy to forward http://jetstream.lappsgrid.org traffic to
         the specified IP address.  The address does not have to be a public ip 
         address, that is, the proxy can forward to 10.x.x.x, 192.168.x.x, etc. 
@@ -327,6 +327,9 @@ case $1 in
 		;;
 	stop)
 		run_command stop 'Stopping' $2
+		;;
+	start)
+		run_command start 'Starting' $2
 		;;
 	delete)
 	    if [[ $2 == *proxy* ]] ; then
