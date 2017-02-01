@@ -18,6 +18,9 @@ if [ -z "$OS_USERNAME" ] ; then
 	echo "script and try again. One of the following might work:"
 	echo "source ~/openrc.sh"
 	echo "source ~/bin/openrc.sh"
+	echo 
+	echo "See http://wiki.lappsgrid/org/technical/jetstream for instructions"
+	echo "for generating the openrc.sh script if you don't have one."	
 	exit 1	
 fi
 
