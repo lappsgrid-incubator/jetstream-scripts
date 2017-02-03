@@ -1,6 +1,6 @@
 # Jetstream Scripts
 
-Bash scripts used to initialize and control VM instances on the Jetstream cluster.
+Bash scripts used to initialize and control VM instances on the Jetstream cluster. Note that many of the scripts are not specific to Jetstream.
 
 The following scripts are available:
 
