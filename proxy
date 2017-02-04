@@ -14,15 +14,34 @@ ENABLED=/etc/nginx/sites-enabled
 
 function enable() {
     if [ ! -f $ENABLED/$1 ] ; then
-        echo "Linking $1"
+        echo "Enabling $1"
 		ln -s $AVAILABLE/$1 $ENABLED/$1
+	else
+		echo "$1 is already enabled."
     fi
 }
 
 function disable() {
     if [ -f $ENABLED/$1 ] ; then
+    	echo "Disabling $1"
         rm $ENABLED/$1
+    else
+    	echo "$1 was not enabled."
     fi
+}
+
+function setserver() {
+	name=$1
+	port=$2
+	if [ -z "$port" ] ; then
+		port=8080
+	fi
+    cat << EOF > /etc/nginx/upstream.conf
+upstream galaxy {
+    server $name:$port;
+}
+EOF
+	echo "Proxy is now forwarding to $name:$port"
 }
 
 case $1 in
@@ -33,20 +52,14 @@ case $1 in
 		;;
     online)
         disable offline
+        if [ -n "$2" ] ; then
+        	setserver $2 $3
+        fi
 		enable jetstream
 		service nginx restart
     	;;
     server)
-		port=$3
-		if [ -z $port ] ; then
-			port=8080
-		fi
-        cat << EOF > /etc/nginx/upstream.conf
-upstream galaxy {
-    server $2:$port;
-}
-EOF
-		echo "Proxy is now forwarding to $2"
+		setserver $2 $3
         ;;
      *)
          echo "ERROR: Unknown command $1"
