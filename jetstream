@@ -6,7 +6,11 @@ set -e
 
 # Set PEM to the location of the lappsgrid-shared-key. Possession of this key
 # allows the user to manage instances on Jetstream.
-PEM=$HOME/.ssh/lappsgrid-shared-key.pem
+if [[ -e ./lappsgrid-shared-key.pem ]] ; then
+    PEM=./lappsgrid-shared-key.pem
+else
+    PEM=$HOME/.ssh/lappsgrid-shared-key.pem
+fi
 
 # This will never need to be changed... until it needs to be changed.
 # This is the IP used for several *.lappsgrid.org addresses and only needs
