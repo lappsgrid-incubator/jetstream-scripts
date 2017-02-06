@@ -168,8 +168,9 @@ $(hi OPTIONS)
         associates the provided IP with the new instance.  If an IP address is
         provided then it must have been allocated previously.
 	    
-    $(hi -i)|$(hi --image) [ubuntu|docker|manager]
+    $(hi -i)|$(hi --image) [centos|ubuntu|docker|manager]
         The VM image to be used for the instance.  Valid options are:
+        $(hi centos) CentOS 7
         $(hi ubuntu) Default Ubuntu 14.04.3 Development image.
         $(hi docker) Ubuntu image with Docker and Docker Compose.
         $(hi master) Ubuntu image with Docker, Compose, and Lappsgrid tools.
