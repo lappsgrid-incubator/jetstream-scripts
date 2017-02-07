@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# This script seems to work on CentOS/RedHat and Ubuntu
 
 COMPOSE_VERSION=1.8.1
 

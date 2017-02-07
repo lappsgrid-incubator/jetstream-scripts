@@ -321,8 +321,19 @@ function is_ip_address() {
 	exit 1
 }
 
+function list_ip() {
+	if [[ `nova list | grep "$1" | wc -l` -ne 1 ]] ; then
+		echo "Ambiguous image name $1"
+		exit 1
+	fi
+	echo `nova list | grep "$1" | rev | awk '{print $2}' | rev`
+}
+
 # Main program starts here.
 case $1 in
+	test)
+		echo $(list_ip $2)
+		;;
 	list)
 		nova list
 		;;
@@ -362,6 +373,22 @@ case $1 in
 		fi
 		ssh -i $PEM root@$PROXY proxy server $2 $3
 		;;
+	forget)
+		known_hosts=$HOME/.ssh/known_hosts
+		if [ ! -e "$known_hosts" ] ; then
+			echo "Can not find the known_hosts file."
+			exit 1
+		fi
+		IP=
+		if $(is_ip_address "$2") ; then
+			IP=$2
+		else
+			IP=$(list_ip $2)
+		fi
+		echo "Removing $2 from $known_hosts"
+		grep -v $IP $known_hosts > /tmp/known_hosts
+		mv /tmp/known_hosts $known_hosts
+		;;
 	ssh)
 		IP=
 		if $(is_ip_address "$2") ; then
@@ -371,7 +398,7 @@ case $1 in
 			# have to grep it out of the `nova list` output.
 			# Parsing the 2nd to last element is much easier if
 			# we reverse the input and just find the 2nd element.
-			IP=`nova list | grep "$2" | rev | awk '{print $2}' | rev`
+			IP=$(list_ip $2)
 		fi
 		echo "Connecting to $IP"
 		ssh -i $PEM root@$IP
