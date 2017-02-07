@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -u
 
 scripts=http://downloads.lappsgrid.org/keith
@@ -26,6 +26,8 @@ fi
 if [[ $OS = ubuntu ]] ; then
 	log "Updating apt-get indices."
 	apt-get update
+else
+	yum makecache fast
 fi
 
 set +u
