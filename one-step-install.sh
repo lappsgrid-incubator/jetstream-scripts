@@ -41,9 +41,9 @@ echo "Configuring the Service Manager"
 wget $scripts/ServiceManager.config
 wget http://downloads.lappsgrid.org/smg-1.0.0.tgz
 tar xzf smg-1.0.0.tgz
-chmod +x smg
+chmod +x smg-1.0.0/smg
 $EDITOR ServiceManager.config
-./smg ServiceManager.config
+smg-1.0.0/smg ServiceManager.config
 
 # Now install Tomcat and create the PostgreSQL database.
 echo "Starting Tomcat installation."
