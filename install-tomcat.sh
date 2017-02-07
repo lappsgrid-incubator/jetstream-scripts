@@ -4,14 +4,15 @@ if [ -z "$OS" ] ; then
 	source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
 fi
 
-if [[ $OS = RedHat ]] ; then
+if [[ $OS = redhat || $OS = centos ]] ; then
 	add=useradd
-elif [[ $OS = Ubuntu ]] ; then
+elif [[ $OS = ubuntu ]] ; then
 	add=adduser
 else
 	echo "Unknown Linux flavor"
 	exit 1
 fi
+
 $add --system --home /usr/share/tomcat --shell /usr/bin/bash
 wget http://downloads.lappsgrid.org/tomcat.tgz
 tar xzf tomcat.tgz

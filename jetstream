@@ -168,10 +168,12 @@ $(hi OPTIONS)
         Specifies the name for the instance.  The name will be prefixed with $(em lappsgrid-) 
         if it is not already.
 					
-    $(hi --ip) [assign|<ip address>]	
-        Allocates an floating ip address and associates it with the new instance or 
-        associates the provided IP with the new instance.  If an IP address is
-        provided then it must have been allocated previously.
+    $(hi --ip) [free|alloc|<ip address>]	
+        Associates a floating ip address to the new instance. Users may specify
+        the ip address, allocate a new floating ip address, or use an ip address
+        that has been allocated by not assigned to an instance. If an ip address
+        is provided then it must have been allocated via the $(hi --ip alloc) 
+        command already.
 	    
     $(hi -i)|$(hi --image) [centos|ubuntu|docker|manager]
         The VM image to be used for the instance.  Valid options are:
@@ -230,10 +232,21 @@ function launch() {
 				fi
 				IP=$2
 				shift
-				if [[ "$IP" == "assign" ]] ; then
+				if (is_ip_address $IP) ; then
+					echo "Assignin ip address $IP"					
+				elif [[ $IP = alloc ]] ; then
 					echo "Getting a floating IP address."
 					IP=`nova floating-ip-create public | tail -2 | head -1 | awk '{print $4}'`
 					echo $IP
+				elif [[ $IP = free ]] ; then
+					IP=$(get_free_ip)
+					if [[ -z $IP ]] ; then
+						echo "There are no unassigned floating ip addresses available."
+						exit 1
+					fi
+				else
+					echo "Invalid option or address: $IP"
+					exit 1
 				fi
 				;;
 			-i|--image)
@@ -323,10 +336,18 @@ function is_ip_address() {
 
 function list_ip() {
 	if [[ `nova list | grep "$1" | wc -l` -ne 1 ]] ; then
-		echo "Ambiguous image name $1"
+		echo "Ambiguous image name $1" >&2
 		exit 1
 	fi
 	echo `nova list | grep "$1" | rev | awk '{print $2}' | rev`
+}
+
+function floating_ip {
+	echo `neutron floatingip-list -F fixed_ip_address -F floating_ip_address | grep -v 10.0 | grep 149 | awk '{print $3}'`
+}
+
+function get_free_ip {
+	echo `neutron floatingip-list -F fixed_ip_address -F floating_ip_address | grep -v 10.0 | grep 149 | awk '{print $3}' | head -1`
 }
 
 # Main program starts here.
@@ -381,13 +402,15 @@ case $1 in
 		fi
 		IP=
 		if $(is_ip_address "$2") ; then
+			echo "$2 is an ip address."
 			IP=$2
 		else
+			echo "Getting ip address for $2"
 			IP=$(list_ip $2)
 		fi
-		echo "Removing $2 from $known_hosts"
-		grep -v $IP $known_hosts > /tmp/known_hosts
-		mv /tmp/known_hosts $known_hosts
+		echo "Removing $IP from $known_hosts"
+		#grep -v $IP $known_hosts > /tmp/known_hosts
+		#mv /tmp/known_hosts $known_hosts
 		;;
 	ssh)
 		IP=
@@ -417,6 +440,20 @@ case $1 in
 				;;
 			*)
 				echo "Unknown option: $2"
+				;;
+		esac
+		;;
+	ip)
+		case $2 in
+			list)
+				neutron floatingip-list -F fixed_ip_address -F floating_ip_address | grep -v 10.0 | grep 149 | awk '{print $3}'
+				;;
+			list-all)
+				nova floating-ip-list
+				;;
+			*)
+				echo "Unrecognized option. Use list or list-all"
+				exit 1
 				;;
 		esac
 		;;
