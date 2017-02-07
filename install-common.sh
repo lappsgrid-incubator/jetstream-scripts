@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Commonly needed programs and utilities not included in the default images.
-common="git zip unzip emacs23-nox"
+common="git zip unzip"
 
 if [ -z "$OS" ] ; then
 	source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
@@ -9,6 +9,7 @@ fi
 
 if [[ $OS = redhat || $OS = centos ]] ; then
 	install="yum install -y"
+	common="$common emacs-nox.x86_64"
 elif [[ $OS = ubuntu ]] ; then
 	install="apt-get install -y"
 else
