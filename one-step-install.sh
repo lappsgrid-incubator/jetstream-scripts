@@ -12,14 +12,19 @@ function usage()
 	echo
 }
 
+function log {
+	echo $1 | tee /var/log/one-step-install.log >&2
+}
+
 source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
 
 if [[ -z $OS ]] ; then
-	echo "The variable OS has not been set!"
+	log "The variable OS has not been set!"
 	exit 1
 fi
 
 if [[ $OS = ubuntu ]] ; then
+	log "Updating apt-get indices."
 	apt-get update
 fi
 
@@ -31,13 +36,16 @@ set -u
 
 # Installs the packages required to install and run the Service Grid.
 set -e
+log "Installing common packages"
 curl -sSL $scripts/install-common.sh | bash
+log "Installing Java"
 curl -sSL $scripts/install-java.sh | bash
+log "Installing PostgreSQL"
 curl -sSL $scripts/install-postgres.sh | bash
 
 # Edit the Service Manager config file. The config file is used
 # to generate then Tomcat config files.
-echo "Configuring the Service Manager"
+log "Configuring the Service Manager"
 wget $scripts/ServiceManager.config
 wget http://downloads.lappsgrid.org/smg-1.0.0.tgz
 tar xzf smg-1.0.0.tgz
@@ -46,7 +54,7 @@ $EDITOR ServiceManager.config
 smg-1.0.0/smg ServiceManager.config
 
 # Now install Tomcat and create the PostgreSQL database.
-echo "Starting Tomcat installation."
+log "Starting Tomcat installation."
 MANAGER=/usr/share/tomcat/service-manager
 BPEL=/usr/share/tomcat/active-bpel
 curl -sSL $scripts/install-tomcat.sh | bash
@@ -60,14 +68,14 @@ cp langrid.ae.properties $BPEL/bpr
 
 source ./db.config
 
-echo "-- creating role, database and stored procedure."
+log "Creating role, database and stored procedure."
 createuser -S -D -R -P $ROLENAME
 createdb $DATABASE -O $ROLENAME -E 'UTF8'
 createlang plpgsql $DATABASE
 psql $DATABASE < create_storedproc.sql
 psql $DATABASE -c "ALTER FUNCTION \"AccessStat.increment\"(character varying, character varying, character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, integer, timestamp without time zone, integer, timestamp without time zone, integer, integer, integer, integer) OWNER TO $ROLENAME"
 
-echo "Securing the Tomcat installations in $TOMCAT_ROOT/tomcat"
+log "Securing the Tomcat installations"
 for dir in $MANAGER $BPEL ; do
 	pushd $dir > /dev/null
 	# Make the tomcat user the owner of everything.
@@ -83,11 +91,11 @@ for dir in $MANAGER $BPEL ; do
 	popd > /dev/null
 done
 
-echo "Downloading the latest service manager war file."
+log "Downloading the latest service manager war file."
 wget https://github.com/openlangrid/langrid/releases/download/servicegrid-core-20161206/jp.go.nict.langrid.webapps.servicegrid-core.jxta-p2p.nict-nlp-20161206.war
 mv jp.go.nict.langrid.webapps.servicegrid-core.jxta-p2p.nict-nlp-20161206.war $MANAGER/webapps/service_manager.war
 
-echo "Removing default webapps."
+log "Removing default webapps."
 for dir in $MANAGER/webapps $BPEL/webapps ; do
 	pushd $dir > /dev/null
 	rm -rf docs examples manager host-manager
@@ -101,5 +109,5 @@ else
 	service tomcat start
 fi
 
-echo "The Service Grid is now running."
+log "The Service Grid is now running."
 echo

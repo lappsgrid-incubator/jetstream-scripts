@@ -445,10 +445,10 @@ case $1 in
 		;;
 	ip)
 		case $2 in
-			list)
+			free)
 				neutron floatingip-list -F fixed_ip_address -F floating_ip_address | grep -v 10.0 | grep 149 | awk '{print $3}'
 				;;
-			list-all)
+			list)
 				nova floating-ip-list
 				;;
 			*)
