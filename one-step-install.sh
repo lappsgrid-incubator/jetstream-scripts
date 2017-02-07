@@ -71,7 +71,8 @@ cp langrid.ae.properties $BPEL/bpr
 source ./db.config
 
 log "Creating role, database and stored procedure."
-createuser -S -D -R -P $ROLENAME
+createuser -S -D -R $ROLENAME
+psql --command "ALTER USER $ROLENAME WITH PASSWORD '$ROLENAME'"
 createdb $DATABASE -O $ROLENAME -E 'UTF8'
 createlang plpgsql $DATABASE
 psql $DATABASE < create_storedproc.sql
