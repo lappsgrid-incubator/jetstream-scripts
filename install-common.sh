@@ -7,7 +7,7 @@ if [ -z "$OS" ] ; then
 	source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
 fi
 
-if [[ $OS = redhat ]] ; then
+if [[ $OS = redhat || $OS = centos ]] ; then
 	install="yum install -y"
 elif [[ $OS = ubuntu ]] ; then
 	install="apt-get install -y"
