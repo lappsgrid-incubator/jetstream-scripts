@@ -8,6 +8,7 @@ echo "Installing OpenJDK 8"
 if [[ $OS = redhat ]] ; then
 	yum install -y java-1.8.0-openjdk-devel
 elif [[ $OS = ubuntu ]] ; then	
+	add-apt-repository ppa:openjdk-r/ppa
 	apt-get install -y openjdk-8-jdk
 else
 	echo "Unknown Linux Flavor"
