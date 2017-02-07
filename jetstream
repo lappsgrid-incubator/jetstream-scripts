@@ -403,10 +403,17 @@ case $1 in
 		echo "Connecting to $IP"
 		ssh -i $PEM root@$IP
 		;;
+	scp)
+		echo "Uploading $2 to root@downloads.lappsgrid.org:$3"
+		scp -i $PEM $2 root@downloads.lappsgrid.org:$3
+		;;
 	scripts)
 		case $2 in
 			pull)
 				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/scripts && pwd && git pull origin master"
+				;;
+			pull-keith)
+				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/keith && pwd && git pull origin keith"
 				;;
 			*)
 				echo "Unknown option: $2"
@@ -424,7 +431,11 @@ case $1 in
 		if $(is_ip_address "$2") ; then
 			IP=$2
 		else
-			IP=`nova list | grep "$2" | rev | awk '{print $2}' | rev`
+			IP=$(list_ip $2)
+		fi
+		port=
+		if [ -n "$3" ] ; then
+			port=":$3"
 		fi
 		echo "Opening $IP in a web browser"
 		case "$OSTYPE" in
@@ -438,7 +449,7 @@ case $1 in
 			  open="open"
 			  ;;
 		esac		
-		$open http://$IP
+		$open http://$IP$port
 		;;
 	help)
 		help
