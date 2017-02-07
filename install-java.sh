@@ -4,6 +4,7 @@ if [ -z "$OS" ] ; then
 	source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
 fi
 
+echo "Installing OpenJDK 8"
 if [[ $OS = redhat ]] ; then
 	yum install -y java-1.8.0-openjdk-devel
 elif [[ $OS = ubuntu ]] ; then	

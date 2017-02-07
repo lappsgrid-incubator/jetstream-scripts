@@ -15,6 +15,8 @@ else
 	echo "Unknown Linux flavor $OS"
 	exit 1
 fi
+
+echo "Installing common packages."
 for package in $common ; do
 	if [[ ! `which $package` ]] ; then
 		$install $package

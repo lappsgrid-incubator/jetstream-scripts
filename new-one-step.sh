@@ -1,6 +1,8 @@
 #!/bin/bash
 set -u
 
+SCRIPTS=http://downloads.lappsgrid.org/keith
+
 function usage()
 {
 	echo
@@ -10,28 +12,13 @@ function usage()
 	echo
 }
 
-export OS=$(head -1 /etc/os-release | cut -d\" -f2)
-if  [ "$OS" = "CentOS Linux" ] ; then
-	# Add CentOS specific configuration here.
-	echo "Found CentOS"
-	INSTALL="yum -y"
-	java_package=java-1.8.0-openjdk-devel
-	yum-config-manager --add-repo https://docs.docker.com/engine/installation/linux/repo_files/centos/docker.repo
-	yum install -y https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-redhat96-9.6-3.noarch.rpm
-	yum install postgresql96-server
-elif [ "$OS" = "Ubuntu" ] ; then
-	# Add Ubuntu specific configuration here.
-	echo "Running on Ubuntu"
-	INSTALL="apt-get -y"
-	apt-get update
-	java_package=openjdk-8-jdk
-else
-	echo "Unknown Linux Flavor"
-	exit 1
-fi
-export INSTALL
-set +u
+source <(curl -sSL $SCRIPTS/sniff.sh)
 
+if [[ $OS = ubuntu ]] ; then
+	apt-get update
+fi
+
+set +u
 if [ -z "$EDITOR" ] ; then
 	EDITOR=emacs
 fi
@@ -45,16 +32,13 @@ if [ $? -ne 0 ] ; then
 	$INSTALL emacs
 fi
 
-which unzip
-if [ $? -ne 0 ] ; then
-	$INSTALL unzip
-fi
+curl -sSL $SCRIPTS/install-common.sh | bash
 
 # Installs the packages required to install and run the Service Grid.
 #set -e
 #$INSTALL java postgres
-curl -sSL http://downloads.lappsgrid.org/scripts/install-java.sh | sh
-curl -sSL http://downloads.lappsgrid.org/scripts/install-postgres.sh | sh
+curl -sSL http://downloads.lappsgrid.org/scripts/install-java.sh | bash
+curl -sSL http://downloads.lappsgrid.org/scripts/install-postgres.sh | bash
 
 set +e
 
