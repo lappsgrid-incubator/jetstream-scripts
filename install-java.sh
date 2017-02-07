@@ -1,20 +1,12 @@
 #!/usr/bin/env bash
 
-if [[ `cat /etc/*-release | grep -i ubuntu` ]] ; then 
-    OS="Ubuntu"
-elif [[ `cat /etc/*-release | grep -i "red hat"` ]] ; then 
-    OS="RedHat"
-elif [[ `cat /etc/*-release | grep -i "centos"` ]] ; then 
-    OS="RedHat"
+if [ -z "$OS" ] ; then
+	source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
 fi
 
-if  [ "$OS" = "RedHat" ] ; then
-	# Add CentOS specific configuration here.
-	echo "Running RedHat-family"
+if [[ $OS = redhat ]] ; then
 	yum install -y java-1.8.0-openjdk-devel
-elif [ "$OS" = "Ubuntu" ] ; then
-	# Add Ubuntu specific configuration here.
-	echo "Running on Ubuntu"
+elif [[ $OS = ubuntu ]] ; then	
 	apt-get install -y openjdk-8-jdk
 else
 	echo "Unknown Linux Flavor"
