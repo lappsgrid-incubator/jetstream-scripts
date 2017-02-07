@@ -22,9 +22,9 @@ chown -R tomcat:tomcat /usr/share/tomcat
 wget http://downloads.lappsgrid.org/keith/tomcat.sh
 mv tomcat.sh /etc/init.d
 
-if [[ $OS = RedHat ]] ; then
+if [[ $OS = centos ]] ; then
 	systemctl enable tomcat
-elif [[ $OS = Ubuntu ]] ; then
+elif [[ $OS = ubuntu || $OS = redhat ]] ; then
 	update-rc.d tomcat defaults
 else
 	echo "Unknown Linux flavor... we should have failed already."
