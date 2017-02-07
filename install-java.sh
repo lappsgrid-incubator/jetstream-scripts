@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 
-OS=$(head -1 /etc/os-release | cut -d\" -f2)
-if  [ "$OS" = "CentOS Linux" ] ; then
+if [[ `cat /etc/*-release | grep -i ubuntu` ]] ; then 
+    OS="Ubuntu"
+elif [[ `cat /etc/*-release | grep -i "red hat"` ]] ; then 
+    OS="RedHat"
+elif [[ `cat /etc/*-release | grep -i "centos"` ]] ; then 
+    OS="RedHat"
+fi
+
+if  [ "$OS" = "RedHat" ] ; then
 	# Add CentOS specific configuration here.
-	echo "Running CentOS"
+	echo "Running RedHat-family"
 	yum install -y java-1.8.0-openjdk-devel
 elif [ "$OS" = "Ubuntu" ] ; then
 	# Add Ubuntu specific configuration here.
