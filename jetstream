@@ -81,7 +81,7 @@ NETWORK="lappsgrid-network"
 # Prints the help screen for the user.
 #
 function usage {
-	if [ -n $1 ] ; then
+	if [[ -n $1 ]] ; then
 		echo "$1" | cat -
 		echo | cat -
 	fi
