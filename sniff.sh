@@ -2,11 +2,11 @@
 # the flavor of Linux they are running on.
 
 if [[ `cat /etc/*-release | grep -i ubuntu` ]] ; then 
-    OS="ubuntu"
+    OS="Ubuntu"
 elif [[ `cat /etc/*-release | grep -i "red hat"` ]] ; then 
-    OS="redhat"
+    OS="RedHat"
 elif [[ `cat /etc/*-release | grep -i "centos"` ]] ; then 
-    OS="redhat"
+    OS="RedHat"
 fi
 
 export OS
