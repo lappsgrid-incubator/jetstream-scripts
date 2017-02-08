@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash 
 set -u
 
 #VERSION=__VERSION__

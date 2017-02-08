@@ -1,3 +1,4 @@
+#! /usr/bin/env bash 
 # This file should be sourced by other install scripts that need to determine
 # the flavor of Linux they are running on.
 
@@ -9,5 +10,6 @@ elif [[ `cat /etc/*-release | grep -i "centos"` ]] ; then
     OS="centos"
 fi
 
+echo "Found $OS"
 export OS
 

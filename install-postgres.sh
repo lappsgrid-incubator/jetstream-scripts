@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 
-if [[ `cat /etc/*-release | grep -i ubuntu` ]] ; then 
-    OS="Ubuntu"
-elif [[ `cat /etc/*-release | grep -i "red hat"` ]] ; then 
-    OS="RedHat"
-elif [[ `cat /etc/*-release | grep -i "centos"` ]] ; then 
-    OS="RedHat"
-fi
+. sniff.sh
 
 if [ "$OS" = "RedHat" ] ; then
 	yum install -y https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-redhat96-9.6-3.noarch.rpm
