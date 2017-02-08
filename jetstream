@@ -139,7 +139,7 @@ $(hi COMMANDS)
         address, that is, the proxy can forward to 10.x.x.x, 192.168.x.x, etc. 
         provided the proxy and server are on the same subnet.
       
-    $(hi scripts pull|pull-manager)
+    $(hi scripts "pull|pull-manager")
         Does a $(hi git pull) from with the /var/lib/downloads/scripts directory or 
         /var/lib/downloads/service-manager on the proxy server.  Use this command 
         to remotely update the scripts available.
@@ -448,15 +448,15 @@ case $1 in
 		echo "Uploading $2 to root@downloads.lappsgrid.org:$3"
 		scp -i $PEM $2 root@downloads.lappsgrid.org:$3
 		;;
-	scripts)
+	pull)
 		case $2 in
-			pull)
+			scripts)
 				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/scripts && pwd && git pull origin master"
 				;;
-			pull-manager)
+			manager)
 				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/service-manager && pwd && git pull origin master"
 				;;
-			pull-keith)
+			keith)
 				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/keith && pwd && git pull origin keith"
 				;;
 			*)
