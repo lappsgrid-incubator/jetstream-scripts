@@ -139,10 +139,10 @@ $(hi COMMANDS)
         address, that is, the proxy can forward to 10.x.x.x, 192.168.x.x, etc. 
         provided the proxy and server are on the same subnet.
       
-    $(hi scripts pull)
-        Does a $(hi git pull) from the /var/lib/downloads/scripts directory on
-        the proxy server.  Use this command to remotely update the scripts available
-        from http://downloads.lappsgrid.org/scripts
+    $(hi scripts pull|pull-manager)
+        Does a $(hi git pull) from with the /var/lib/downloads/scripts directory or 
+        /var/lib/downloads/service-manager on the proxy server.  Use this command 
+        to remotely update the scripts available.
         
     $(hi ssh) <ip address | name>
         Connects to the Jetstream instance via ssh.  The name or IP address of the
@@ -452,6 +452,9 @@ case $1 in
 		case $2 in
 			pull)
 				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/scripts && pwd && git pull origin master"
+				;;
+			pull-manager)
+				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/service-manager && pwd && git pull origin master"
 				;;
 			pull-keith)
 				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/keith && pwd && git pull origin keith"

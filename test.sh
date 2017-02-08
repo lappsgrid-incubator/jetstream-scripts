@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-wget http://dowloands.lappsgrid.org/keith/one-step-install.sh
-chmod +x one-step-install.sh
-./one-step-install.sh
+wget http://dowloands.lappsgrid.org/service-manager/setup.sh
+chmod +x setup.sh
+./setup.sh
 
