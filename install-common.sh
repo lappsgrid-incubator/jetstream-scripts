@@ -12,6 +12,7 @@ if [[ $OS = redhat || $OS = centos ]] ; then
 	common="$common emacs-nox.x86_64"
 elif [[ $OS = ubuntu ]] ; then
 	install="apt-get install -y"
+	common="$common emacs24-nox"
 else
 	echo "Unknown Linux flavor $OS"
 	exit 1
