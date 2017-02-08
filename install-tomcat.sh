@@ -4,7 +4,7 @@ if [ -z "$OS" ] ; then
 	source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
 fi
 
-if [[ $OS = redhat || $OS = centos ]] ; then
+if [[ $OS = redhat* || $OS = centos ]] ; then
 	add=useradd
 elif [[ $OS = ubuntu ]] ; then
 	add=adduser
@@ -24,7 +24,7 @@ mv tomcat.sh /etc/init.d
 
 if [[ $OS = centos ]] ; then
 	systemctl enable tomcat
-elif [[ $OS = ubuntu || $OS = redhat ]] ; then
+elif [[ $OS = ubuntu || $OS = redhat* ]] ; then
 	update-rc.d tomcat defaults
 else
 	echo "Unknown Linux flavor... we should have failed already."

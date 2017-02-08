@@ -3,11 +3,12 @@
 
 if [[ `cat /etc/*-release | grep -i ubuntu` ]] ; then 
     OS="ubuntu"
-elif [[ `cat /etc/*-release | grep -i "red hat"` ]] ; then 
-    OS="redhat"
-elif [[ `cat /etc/*-release | grep -i "centos"` ]] ; then 
+elif [[ -e /etc/redhat-release ]] ; then 
+    OS="redhat`lsb_release -a | grep --color=never Release: | cut -f 2 | cut -c 1`"
+elif [[ -e /etc/centos-release ]] ; then 
     OS="centos"
 fi
 
+echo "Found $OS"
 export OS
 
