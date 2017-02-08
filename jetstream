@@ -103,15 +103,19 @@ $(hi COMMANDS)
 	    
     $(hi list)
         Lists all instances currently allocated, including suspended and stopped instances.
-	    
+	
+    $(hi "ip list|free")
+        $(hi list) : lists all floating ip addresses allocated.
+        $(hi free) : lists floating ip not assigned to instances.
+        	    
     $(hi suspend) <name>
-        Suspends an instance.
+        Suspends an instance. (Sleep)
 	    
     $(hi resume) <name>
-        Resumes an instance.
+        Resumes an suspended instance. 
 	    
     $(hi stop) <name>
-        Stops an instances.
+        Stops an instances. (Shutdown)
 	    
     $(hi delete) <name>
         Deletes an instance.  All data in memory and on disk will be lost.
@@ -144,11 +148,14 @@ $(hi COMMANDS)
         Connects to the Jetstream instance via ssh.  The name or IP address of the
         instance can be specified.  If the name is provided the script will attempt
         to parse IP address from the output of the $(hi nova list) command.
-            
+           
+    $(hi scp) <local_path> <remote_path> 
+        Copies a local file to the proxy server (i.e. downloads.lappsgrid.org)
+        
     $(hi help)
         Displays this help message.
 	
-$(hi OPTIONS) 
+$(hi LAUNCH OPTIONS) 
     $(hi -t)|$(hi --tiny)	
         Launches a tiny instance (1x2)
 	
@@ -195,6 +202,8 @@ $(hi '$>') jetstream launch lappsgrid-test
 $(hi '$>') jetstream suspend test
     Suspends the instance named $(hi lappsgrid-test)
 
+$(hi '$>') jetstream scp my_file.tgz /var/lib/downloads
+
 Press $(hi Q) to exit help.
 
 EOF
@@ -235,6 +244,14 @@ function launch() {
 				if (is_ip_address $IP) ; then
 					echo "Assignin ip address $IP"					
 				elif [[ $IP = alloc ]] ; then
+					echo "Getting a floating IP address."
+					IP=`nova floating-ip-create public | tail -2 | head -1 | awk '{print $4}'`
+					echo $IP
+				elif [[ $IP = assign ]] ; then
+					echo "$(hi WARNING) the $(hi assign) option has been deprecated and"
+					echo "will be removed in a future update of the jetstream script."
+					echo "Please use $(hi --ip alloc) instead."
+					echo
 					echo "Getting a floating IP address."
 					IP=`nova floating-ip-create public | tail -2 | head -1 | awk '{print $4}'`
 					echo $IP
@@ -395,11 +412,11 @@ case $1 in
 		ssh -i $PEM root@$PROXY proxy server $2 $3
 		;;
 	forget)
-		known_hosts=$HOME/.ssh/known_hosts
-		if [ ! -e "$known_hosts" ] ; then
-			echo "Can not find the known_hosts file."
-			exit 1
-		fi
+		#known_hosts=$HOME/.ssh/known_hosts
+		#if [ ! -e "$known_hosts" ] ; then
+		#	echo "Can not find the known_hosts file."
+		#	exit 1
+		#fi
 		IP=
 		if $(is_ip_address "$2") ; then
 			echo "$2 is an ip address."
@@ -409,6 +426,7 @@ case $1 in
 			IP=$(list_ip $2)
 		fi
 		echo "Removing $IP from $known_hosts"
+		ssh-keygen -R $IP
 		#grep -v $IP $known_hosts > /tmp/known_hosts
 		#mv /tmp/known_hosts $known_hosts
 		;;
