@@ -139,7 +139,7 @@ $(hi COMMANDS)
         address, that is, the proxy can forward to 10.x.x.x, 192.168.x.x, etc. 
         provided the proxy and server are on the same subnet.
       
-    $(hi scripts "pull|pull-manager")
+    $(hi pull "scripts|manager")
         Does a $(hi git pull) from with the /var/lib/downloads/scripts directory or 
         /var/lib/downloads/service-manager on the proxy server.  Use this command 
         to remotely update the scripts available.
