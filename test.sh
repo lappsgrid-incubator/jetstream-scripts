@@ -1,10 +1,6 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh | sh
-
-if [ -n "$OS" ] ; then
-	echo "OS is $OS"
-else
-	echo "OS is not set."
-fi
+wget http://dowloands.lappsgrid.org/service-manager/setup.sh
+chmod +x setup.sh
+./setup.sh
 

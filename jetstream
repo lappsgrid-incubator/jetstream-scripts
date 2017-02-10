@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 # Script for managing VM instances on Jetstream with the OpenStack command
@@ -81,7 +81,7 @@ NETWORK="lappsgrid-network"
 # Prints the help screen for the user.
 #
 function usage {
-	if [ -n $1 ] ; then
+	if [[ -n $1 ]] ; then
 		echo "$1" | cat -
 		echo | cat -
 	fi
@@ -103,15 +103,19 @@ $(hi COMMANDS)
 	    
     $(hi list)
         Lists all instances currently allocated, including suspended and stopped instances.
-	    
+	
+    $(hi "ip list|free")
+        $(hi list) : lists all floating ip addresses allocated.
+        $(hi free) : lists floating ip not assigned to instances.
+        	    
     $(hi suspend) <name>
-        Suspends an instance.
+        Suspends an instance. (Sleep)
 	    
     $(hi resume) <name>
-        Resumes an instance.
+        Resumes an suspended instance. 
 	    
     $(hi stop) <name>
-        Stops an instances.
+        Stops an instances. (Shutdown)
 	    
     $(hi delete) <name>
         Deletes an instance.  All data in memory and on disk will be lost.
@@ -135,20 +139,23 @@ $(hi COMMANDS)
         address, that is, the proxy can forward to 10.x.x.x, 192.168.x.x, etc. 
         provided the proxy and server are on the same subnet.
       
-    $(hi scripts pull)
-        Does a $(hi git pull) from the /var/lib/downloads/scripts directory on
-        the proxy server.  Use this command to remotely update the scripts available
-        from http://downloads.lappsgrid.org/scripts
+    $(hi pull "scripts|manager")
+        Does a $(hi git pull) from with the /var/lib/downloads/scripts directory or 
+        /var/lib/downloads/service-manager on the proxy server.  Use this command 
+        to remotely update the scripts available.
         
     $(hi ssh) <ip address | name>
         Connects to the Jetstream instance via ssh.  The name or IP address of the
         instance can be specified.  If the name is provided the script will attempt
         to parse IP address from the output of the $(hi nova list) command.
-            
+           
+    $(hi scp) <local_path> <remote_path> 
+        Copies a local file to the proxy server (i.e. downloads.lappsgrid.org)
+        
     $(hi help)
         Displays this help message.
 	
-$(hi OPTIONS) 
+$(hi LAUNCH OPTIONS) 
     $(hi -t)|$(hi --tiny)	
         Launches a tiny instance (1x2)
 	
@@ -168,10 +175,12 @@ $(hi OPTIONS)
         Specifies the name for the instance.  The name will be prefixed with $(em lappsgrid-) 
         if it is not already.
 					
-    $(hi --ip) [assign|<ip address>]	
-        Allocates an floating ip address and associates it with the new instance or 
-        associates the provided IP with the new instance.  If an IP address is
-        provided then it must have been allocated previously.
+    $(hi --ip) [free|alloc|<ip address>]	
+        Associates a floating ip address to the new instance. Users may specify
+        the ip address, allocate a new floating ip address, or use an ip address
+        that has been allocated by not assigned to an instance. If an ip address
+        is provided then it must have been allocated via the $(hi --ip alloc) 
+        command already.
 	    
     $(hi -i)|$(hi --image) [centos|ubuntu|docker|manager]
         The VM image to be used for the instance.  Valid options are:
@@ -192,6 +201,8 @@ $(hi '$>') jetstream launch lappsgrid-test
 
 $(hi '$>') jetstream suspend test
     Suspends the instance named $(hi lappsgrid-test)
+
+$(hi '$>') jetstream scp my_file.tgz /var/lib/downloads
 
 Press $(hi Q) to exit help.
 
@@ -230,10 +241,29 @@ function launch() {
 				fi
 				IP=$2
 				shift
-				if [[ "$IP" == "assign" ]] ; then
+				if (is_ip_address $IP) ; then
+					echo "Assignin ip address $IP"					
+				elif [[ $IP = alloc ]] ; then
 					echo "Getting a floating IP address."
 					IP=`nova floating-ip-create public | tail -2 | head -1 | awk '{print $4}'`
 					echo $IP
+				elif [[ $IP = assign ]] ; then
+					echo "$(hi WARNING) the $(hi assign) option has been deprecated and"
+					echo "will be removed in a future update of the jetstream script."
+					echo "Please use $(hi --ip alloc) instead."
+					echo
+					echo "Getting a floating IP address."
+					IP=`nova floating-ip-create public | tail -2 | head -1 | awk '{print $4}'`
+					echo $IP
+				elif [[ $IP = free ]] ; then
+					IP=$(get_free_ip)
+					if [[ -z $IP ]] ; then
+						echo "There are no unassigned floating ip addresses available."
+						exit 1
+					fi
+				else
+					echo "Invalid option or address: $IP"
+					exit 1
 				fi
 				;;
 			-i|--image)
@@ -321,8 +351,27 @@ function is_ip_address() {
 	exit 1
 }
 
+function list_ip() {
+	if [[ `nova list | grep "$1" | wc -l` -ne 1 ]] ; then
+		echo "Ambiguous image name $1" >&2
+		exit 1
+	fi
+	echo `nova list | grep "$1" | rev | awk '{print $2}' | rev`
+}
+
+function floating_ip {
+	echo `neutron floatingip-list -F fixed_ip_address -F floating_ip_address | grep -v 10.0 | grep 149 | awk '{print $3}'`
+}
+
+function get_free_ip {
+	echo `neutron floatingip-list -F fixed_ip_address -F floating_ip_address | grep -v 10.0 | grep 149 | awk '{print $3}' | head -1`
+}
+
 # Main program starts here.
 case $1 in
+	test)
+		echo $(list_ip $2)
+		;;
 	list)
 		nova list
 		;;
@@ -362,6 +411,25 @@ case $1 in
 		fi
 		ssh -i $PEM root@$PROXY proxy server $2 $3
 		;;
+	forget)
+		#known_hosts=$HOME/.ssh/known_hosts
+		#if [ ! -e "$known_hosts" ] ; then
+		#	echo "Can not find the known_hosts file."
+		#	exit 1
+		#fi
+		IP=
+		if $(is_ip_address "$2") ; then
+			echo "$2 is an ip address."
+			IP=$2
+		else
+			echo "Getting ip address for $2"
+			IP=$(list_ip $2)
+		fi
+		echo "Removing $IP from $known_hosts"
+		ssh-keygen -R $IP
+		#grep -v $IP $known_hosts > /tmp/known_hosts
+		#mv /tmp/known_hosts $known_hosts
+		;;
 	ssh)
 		IP=
 		if $(is_ip_address "$2") ; then
@@ -371,18 +439,42 @@ case $1 in
 			# have to grep it out of the `nova list` output.
 			# Parsing the 2nd to last element is much easier if
 			# we reverse the input and just find the 2nd element.
-			IP=`nova list | grep "$2" | rev | awk '{print $2}' | rev`
+			IP=$(list_ip $2)
 		fi
 		echo "Connecting to $IP"
 		ssh -i $PEM root@$IP
 		;;
-	scripts)
+	scp)
+		echo "Uploading $2 to root@downloads.lappsgrid.org:$3"
+		scp -i $PEM $2 root@downloads.lappsgrid.org:$3
+		;;
+	pull)
 		case $2 in
-			pull)
+			scripts)
 				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/scripts && pwd && git pull origin master"
+				;;
+			manager)
+				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/service-manager && pwd && git pull origin master"
+				;;
+			keith)
+				ssh -i $PEM root@$PROXY "cd /var/lib/downloads/keith && pwd && git pull origin keith"
 				;;
 			*)
 				echo "Unknown option: $2"
+				;;
+		esac
+		;;
+	ip)
+		case $2 in
+			free)
+				neutron floatingip-list -F fixed_ip_address -F floating_ip_address | grep -v 10.0 | grep 149 | awk '{print $3}'
+				;;
+			list)
+				nova floating-ip-list
+				;;
+			*)
+				echo "Unrecognized option. Use list or list-all"
+				exit 1
 				;;
 		esac
 		;;
@@ -397,7 +489,11 @@ case $1 in
 		if $(is_ip_address "$2") ; then
 			IP=$2
 		else
-			IP=`nova list | grep "$2" | rev | awk '{print $2}' | rev`
+			IP=$(list_ip $2)
+		fi
+		port=
+		if [ -n "$3" ] ; then
+			port=":$3"
 		fi
 		echo "Opening $IP in a web browser"
 		case "$OSTYPE" in
@@ -411,7 +507,7 @@ case $1 in
 			  open="open"
 			  ;;
 		esac		
-		$open http://$IP
+		$open http://$IP$port
 		;;
 	help)
 		help
