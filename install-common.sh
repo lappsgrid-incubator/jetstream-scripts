@@ -7,7 +7,7 @@ if [ -z "$OS" ] ; then
 	source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
 fi
 
-if [[ $OS = redhat || $OS = centos ]] ; then
+if [[ $OS = redhat* || $OS = centos ]] ; then
 	install="yum install -y"
 	common="$common emacs-nox.x86_64"
 elif [[ $OS = ubuntu ]] ; then
