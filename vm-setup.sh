@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
 if [ -e ./vm-initialize.sh ] ; then
 	# If the jetstream script exists we can assume that this machine

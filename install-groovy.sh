@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
 echo "Installing Groovy."
 wget https://dl.bintray.com/groovy/maven/apache-groovy-binary-2.4.7.zip

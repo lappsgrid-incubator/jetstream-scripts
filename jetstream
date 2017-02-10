@@ -4,12 +4,19 @@ set -e
 # Script for managing VM instances on Jetstream with the OpenStack command
 # line tools.
 
-# Set PEM to the location of the lappsgrid-shared-key. Possession of this key
-# allows the user to manage instances on Jetstream.
-if [[ -e ./lappsgrid-shared-key.pem ]] ; then
-    PEM=./lappsgrid-shared-key.pem
+# Grab the key from the OS_KEY variable if it is set, otherwise use the default.
+if [ -z "$OS_KEY" ] ; then
+    KEY=lappsgrid-shared-key
 else
-    PEM=$HOME/.ssh/lappsgrid-shared-key.pem
+    KEY=$OS_KEY
+fi
+
+# Set PEM to the location of the key. Possession of this key allows the user to
+# manage instances on Jetstream.
+if [[ -e ./$KEY.pem ]] ; then
+    PEM=./$KEY.pem
+else
+    PEM=$HOME/.ssh/$KEY.pem
 fi
 
 # This will never need to be changed... until it needs to be changed.
@@ -73,7 +80,6 @@ MASTER_IMAGE=f9e0fa21-6cad-49fc-97db-efd3812fc199
 # Default values used when launching an image.
 IMAGE=$UBUNTU_IMAGE
 FLAVOR="m1.medium"
-KEY="lappsgrid-shared-key"
 GROUP="lappsgrid-secgroup"
 NETWORK="lappsgrid-network"
 
@@ -139,7 +145,7 @@ $(hi COMMANDS)
         address, that is, the proxy can forward to 10.x.x.x, 192.168.x.x, etc. 
         provided the proxy and server are on the same subnet.
       
-    $(hi scripts "pull|pull-manager")
+    $(hi pull "scripts|manager")
         Does a $(hi git pull) from with the /var/lib/downloads/scripts directory or 
         /var/lib/downloads/service-manager on the proxy server.  Use this command 
         to remotely update the scripts available.
