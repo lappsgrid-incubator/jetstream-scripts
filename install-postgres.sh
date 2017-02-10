@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [ `which psql `]; then 
+    log "PostgreSQL is found, skipping installation"
+    exit 0
+fi
+
 if [ -z "$OS" ] ; then
 	source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
 fi
