@@ -2,7 +2,7 @@
 
 This repository contains various bash scripts used to initialize and control VM instances on the Jetstream cluster. Note that many of the scripts are not specific to Jetstream.
 
-[ <a href="#scripts">overview</a>
+[ <a href="#overview">overview</a>
 | <a href="#jetstream">using Jetstream</a>
 ]
 
