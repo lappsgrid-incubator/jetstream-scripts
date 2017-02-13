@@ -4,10 +4,10 @@ set -e
 dir=
 case $1 in
     manager|service-manager)
-		dir=/var/lib/downlaods/service-manager
+		dir=/var/lib/downloads/service-manager
 		;;
     scripts) 
-		dir=/var/lib.downloads/scripts 
+		dir=/var/lib/downloads/scripts 
 		;;
     groovlets)
 		dir=/var/lib/groovlets
