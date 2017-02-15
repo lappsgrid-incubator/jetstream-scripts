@@ -20,6 +20,13 @@ elif [[ $OS = ubuntu ]] ; then
 
 	sudo apt-get update
 	sudo apt-get install -y postgresql postgresql-contrib
+	
+	service postgresql start
+	until pg_isready ; do 
+		echo "Waiting for PostgreSQL service to start"
+		sleep 2
+	done
+	update-rc.d postgresql default	
 else
 	echo "Unrecognized Linux flavor."
 	exit 1
