@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ `which psql `]; then 
+if [ `which psql` ]; then 
     log "PostgreSQL is found, skipping installation"
     exit 0
 fi
