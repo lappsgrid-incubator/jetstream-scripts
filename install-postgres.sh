@@ -26,7 +26,6 @@ elif [[ $OS = ubuntu ]] ; then
 		echo "Waiting for PostgreSQL service to start"
 		sleep 2
 	done
-	update-rc.d postgresql default	
 else
 	echo "Unrecognized Linux flavor."
 	exit 1
