@@ -39,7 +39,7 @@ instance when the full `vm-initialize.sh` installs more than is needed or wanted
 
 <a name="jetstream"></a>
 
-See the [readme here](Jetstream.html).
+See the [readme here](Jetstream.md).
 
 ## Using Jetstream
 
