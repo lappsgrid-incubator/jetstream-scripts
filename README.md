@@ -3,7 +3,7 @@
 This repository contains various bash scripts used to initialize and control VM instances on the Jetstream cluster. Note that many of the scripts are not specific to Jetstream.
 
 [ <a href="#overview">overview</a>
-| <a href="#jetstream">using Jetstream</a>
+| <a href="Jetstream.md">using Jetstream</a>
 ]
 
 <a name="overview"></a>
@@ -17,6 +17,8 @@ Use the `jetstream` script on your local Linux/MacOS system to manage VM instanc
 on the Jetstream cluster. The `jetstream` script contains command for starting and
 stopping instances as well as reconfiguring the proxy to change the server that
 jetstream.lappsgrid.org resolves to.
+
+You can read more about the Jetstream script [here](Jetstream.md)
 
 - **vm-setup.sh**<br/>
 The OpenStack web UI allows users to upload an initialization script that will be run
