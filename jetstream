@@ -481,6 +481,16 @@ case $1 in
 			list)
 				nova floating-ip-list
 				;;
+			assign)
+				NAME=$(get_name $3)
+				if [[ $4 = free ]] ; then
+					IP=$(get_free_ip)
+				else
+					IP = $4
+				fi
+				nova floating-ip-associate $NAME $IP
+				echo "Assigned $IP to $NAME"
+				;;
 			*)
 				echo "Unrecognized option. Use list or list-all"
 				exit 1
