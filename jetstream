@@ -4,19 +4,18 @@ set -e
 # Script for managing VM instances on Jetstream with the OpenStack command
 # line tools.
 
-# Grab the key from the OS_KEY variable if it is set, otherwise use the default.
-if [ -z "$OS_KEY" ] ; then
-    KEY=lappsgrid-shared-key
-else
-    KEY=$OS_KEY
-fi
+# Key installed to instances to enable SSH connections.
+KEY=lappsgrid-shared-key.pem
 
 # Set PEM to the location of the key. Possession of this key allows the user to
 # manage instances on Jetstream.
-if [[ -e ./$KEY.pem ]] ; then
-    PEM=./$KEY.pem
+if [[ -e ./$KEY ]] ; then
+    PEM=./$KEY
+elif [[ -e $HOME/.ssh/$KEY ]] ; then
+    PEM=$HOME/.ssh/$KEY
 else
-    PEM=$HOME/.ssh/$KEY.pem
+	echo "Please install $KEY to $HOME/.ssh"
+	exit 1
 fi
 
 # This will never need to be changed... until it needs to be changed.
