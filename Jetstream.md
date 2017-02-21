@@ -3,7 +3,7 @@
 1. [Instances commands](#instance-management)
   1. [launch](#launch)
   1. [list](#list)
-  1. [ip](#ip-list-free-assign)
+  1. [ip](#ip)
   1. [start](#start)
   1. [stop](#stop)
   1. [suspend](#suspend)
@@ -121,14 +121,16 @@ jetstream list
 
 Displays a list of all instances currently running of the Jetstream cloud. There should always be at least one instance running; the proxy server on IP 149.165.168.244
 
-<a name="ip"/>
-### ip [ list | free | assign ]
+### ip
 
-```bash
-jetstream ip list
-jetstream ip free
-jetstream assign [free|<address>] <instance name>
-```
+- `jetstream ip list`<br/>
+lists all public IP addresses that have been allocated.
+- `jetstream ip free`<br/>
+lists the public IP addresses that have been allocated but are not currently associated with an instance.
+- `jetstream ip assign free <instance name>`<br/>
+associates an IP address from the pool of available to the named instance.
+- `jetstream ip assign 143.165.171.22 <instance name>`<br/>
+associates a specific IP address with the named instance. The IP address **must** have been previously allocated from Jetstream. 
 
 ### start
 
@@ -136,83 +138,116 @@ jetstream assign [free|<address>] <instance name>
 jetstream start <instance name>
 ```
 
+Starts an instance that was stopped with the `jetstream stop` command. The *start* command is equivalent to a *power on* of the server.
+
 ### stop
 
 ```bash
 jetstream stop <instance name>
 ```
 
+Stops a running instance. The *stop* command is equivalent to a server shutdown (power off). Running applications will be given a chance to shutdown cleanly before being terminated.
+
+
 ### suspend
 
 ```bash
-	jetstream suspend <instance name>
+jetstream suspend <instance name>
 ```
+
+Suspends a running instance. This is equivalent to putting the server to sleep.  The state of the server is preserved and should be restored when the server is resumed.
 
 ### resume
 
 ```bash
-	jetstream resume <instance name>
+jetstream resume <instance name>
 ```
+
+Resumes a suspended instance.
 
 ### delete
 
 ```bash
-	jetstream delete <instance name>
+jetstream delete <instance name>
 ```
+
+Deletes a Jetstream instance. Be sure to save any data from the server before deleting it as all information on the server will be destroyed and unrecoverable.
 
 ## The Proxy Server
 
-### online
+The proxy server is a *tiny* instance running Nginx on a fixed IP address (149.165.168.244). The proxy server acts as the target for jetstream.lappsgrid.org and forwards requests to the appropriate Jetstream instance.
 
-Enable the proxy.  
+The proxy server also serves static content for http://downloads.lappsgrid.org
+
+### proxy
 
 ```bash
-	jetstream online
+jetstream proxy 10.0.0.170
+```
+
+Specify the IP address that jetstream.lappsgrid.org traffic should be forwarded to when the proxy is enabled. The IP address can either be a public or private IP address. 
+
+**NOTE:** This command runs the */usr/local/bin/proxy* script on the proxy server which, in turn, rewrites the */etc/nginx/upstream.conf* file.  
+
+### online
+
+Enables the jetstream Nginx site, that is, creates a symbolic link in */etc/nginx/sites-enabled*. 
+
+```bash
+jetstream online
 ```
 
 ### offline
 
-Disable the proxy. When the proxy is disabled jetstream.lappsgrid.org will redirect to a static *out of service* page.
+Disables the proxy, that is removes the symbolic link in */etc/nginx/sites-enabled/*. When the proxy is disabled http://jetstream.lappsgrid.org will redirect to a static *out of service* page.
 
 ```bash
-	jetstream offline
-```
-
-### proxy
-
-Redirecting to a new server.
-
-```bash
-	jetstream proxy <ip address>
+jetstream offline
 ```
 
 ## Miscellaneous
 
 ### ssh
 
+Establishes a `ssh` connect to the named instance.  The instance must be running and have a public IP address.  If the instance does not have a public IP address first ssh in to the proxy server and then ssh to the instance using its private IP address.
+
 ```bash
-jetstream
+jetstream ssh proxy
 ```
 
 ### scp
 
+Uses `scp` to copy a local file to the remote path on the proxy server.
+
 ```bash
-jetstream
+jetstream scp /local/file /remote/path
 ```
 
 ### visit
 
+Opens a web browser to the named instance.  The instance must have a public IP address associated.  An optional port and path can be specified after the instance name.
+
 ```bash
-jetstream
+jetstream visit test
+jetstream visit demo 8080/service_manager
 ```
 
 ### pull
+
+Used to do a `git pull` in either the */var/lib/downloads/scripts* or */var/lib/downloads/service-manager* directories.
+
 ```bash
-jetstream
+jetstream pull scripts
+jetstream pull manager
 ```
 
+This command is not really needed anymore since GitHub now posts to a web-hook at [http://api.lappsgrid.org](https://github.com/lappsgrid-incubator/groovlets) that updates the downloads site whenever code is pushed to the *master* branches.
+
 ### forget
+
+Uses `ssh-keygen` program to remove the key associated with the server from *~/.ssh/known_hosts*.  Use the `forget` command when an IP address is being recycled and assigned to a different instance.
+
 ```bash
-jetstream
+jetstream forget instance-name
 ```
 
