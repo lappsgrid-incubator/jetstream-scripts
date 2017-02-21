@@ -5,16 +5,16 @@ set -e
 # line tools.
 
 # Key installed to instances to enable SSH connections.
-KEY=lappsgrid-shared-key.pem
+KEY=lappsgrid-shared-key
 
 # Set PEM to the location of the key. Possession of this key allows the user to
 # manage instances on Jetstream.
-if [[ -e ./$KEY ]] ; then
-    PEM=./$KEY
-elif [[ -e $HOME/.ssh/$KEY ]] ; then
-    PEM=$HOME/.ssh/$KEY
+if [[ -e ./$KEY.pem ]] ; then
+    PEM=./$KEY.pem
+elif [[ -e $HOME/.ssh/$KEY.pem ]] ; then
+    PEM=$HOME/.ssh/$KEY.pem
 else
-	echo "Please install $KEY to $HOME/.ssh"
+	echo "Please install $KEY.pem to $HOME/.ssh"
 	exit 1
 fi
 
@@ -307,7 +307,14 @@ function launch() {
 		echo "ERROR: No name specified for the instance."
 		exit 1
 	fi
-	echo "Launching instance $NAME ($FLAVOR)"
+	#echo "Launching instance $NAME ($FLAVOR) with key $KEY"
+	echo "Launching instance"
+	echo "NAME    : $NAME"
+	echo "FLAVOR  : $FLAVOR"
+	echo "IMAGE   : $IMAGE"
+	echo "KEY     : $KEY"
+	echo "GROUP   : $GROUP"
+	echo "NETWORK : $NETWORK"
 	nova boot $NAME \
 		--flavor $FLAVOR \
 		--image $IMAGE \
