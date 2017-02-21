@@ -1,5 +1,9 @@
 # Installation Scripts
 
+This repository contains various bash scripts used to initialize and control VM instances on the Jetstream cluster. Note that many of the [install](#general) scripts are not specific to Jetstream instances and can be used to install software to most Ubuntu, CentOS and RedHat 6/7 machines.  The scripts have not been tested on Debian, Fedora, or other Linux distributions.
+
+Code pushed to the master branch of this repository will be automatically pushed to http://downloads.lappsgrid.org/scripts.
+
 1. [General Installation Scripts](#general)
   1. install-common.sh
   1. install-java.sh
