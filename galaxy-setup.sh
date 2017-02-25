@@ -3,10 +3,10 @@
 # This is the port that Galaxy will listen on.
 export PORT=80
 
-curl -sSL http://downloads.lappsgrid.org/scripts/install-common.sh | sh
-curl -sSL http://downloads.lappsgrid.org/scripts/install-java.sh | sh
-curl -sSL http://downloads.lappsgrid.org/scripts/install-postgres.sh | sh
-curl -sSL http://downloads.lappsgrid.org/scripts/install-lsd.sh | sh
+curl -sSL http://downloads.lappsgrid.org/scripts/install-common.sh | bash
+curl -sSL http://downloads.lappsgrid.org/scripts/install-java.sh | bash
+curl -sSL http://downloads.lappsgrid.org/scripts/install-postgres.sh | bash
+curl -sSL http://downloads.lappsgrid.org/scripts/install-lsd.sh | bash
 
 set -e
 
