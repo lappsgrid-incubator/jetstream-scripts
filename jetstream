@@ -6,6 +6,7 @@ set -e
 
 # Key installed to instances to enable SSH connections.
 KEY=lappsgrid-shared-key
+#KEY=lappsgrid-suderman-key
 
 # Set PEM to the location of the key. Possession of this key allows the user to
 # manage instances on Jetstream.
@@ -329,9 +330,9 @@ function launch() {
 		sleep 5
 		nova floating-ip-associate $NAME $IP
 		
-		echo "To enable ssh from this instance to other instances run the"
-		echo "following command once the instance is up and responding:"
-		echo "scp -i $PEM $PEM root@$IP:/root/.ssh/id_rsa"
+		#echo "To enable ssh from this instance to other instances run the"
+		#echo "following command once the instance is up and responding:"
+		#echo "scp -i $PEM $PEM root@$IP:/root/.ssh/id_rsa"
 	fi
 	
 }
@@ -492,7 +493,7 @@ case $1 in
 				if [[ $4 = free ]] ; then
 					IP=$(get_free_ip)
 				else
-					IP = $4
+					IP=$4
 				fi
 				nova floating-ip-associate $NAME $IP
 				echo "Assigned $IP to $NAME"
