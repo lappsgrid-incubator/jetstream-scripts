@@ -4,19 +4,18 @@ set -e
 # Script for managing VM instances on Jetstream with the OpenStack command
 # line tools.
 
-# Grab the key from the OS_KEY variable if it is set, otherwise use the default.
-if [ -z "$OS_KEY" ] ; then
-    KEY=lappsgrid-shared-key
-else
-    KEY=$OS_KEY
-fi
+# Key installed to instances to enable SSH connections.
+KEY=lappsgrid-shared-key
 
 # Set PEM to the location of the key. Possession of this key allows the user to
 # manage instances on Jetstream.
 if [[ -e ./$KEY.pem ]] ; then
     PEM=./$KEY.pem
-else
+elif [[ -e $HOME/.ssh/$KEY.pem ]] ; then
     PEM=$HOME/.ssh/$KEY.pem
+else
+	echo "Please install $KEY.pem to $HOME/.ssh"
+	exit 1
 fi
 
 # This will never need to be changed... until it needs to be changed.
@@ -76,6 +75,7 @@ CENTOS_IMAGE=217a24b4-2338-4802-8221-fff3bf3fc260
 UBUNTU_IMAGE=d7fe3289-943f-4417-90e8-8a6b171677ca
 DOCKER_IMAGE=f3847d59-6a90-43da-8666-b58699398b9a
 MASTER_IMAGE=f9e0fa21-6cad-49fc-97db-efd3812fc199
+UBUNTU_JAVA_POSTGRES=9b96fac5-38a7-4052-b2f9-e6b29dff7e45
 
 # Default values used when launching an image.
 IMAGE=$UBUNTU_IMAGE
@@ -194,6 +194,7 @@ $(hi LAUNCH OPTIONS)
         $(hi ubuntu) Default Ubuntu 14.04.3 Development image.
         $(hi docker) Ubuntu image with Docker and Docker Compose.
         $(hi master) Ubuntu image with Docker, Compose, and Lappsgrid tools.
+        $(hi ubuntu-java-postgres) Ubuntu 14.04.3 with Java and Postgres.
 	
 $(hi EXAMPLES)
 
@@ -282,6 +283,7 @@ function launch() {
 					ubuntu) IMAGE=$UBUNTU_IMAGE ;;
 					master) IMAGE=$MASTER_IMAGE ;;
 					centos) IMAGE=$CENTOS_IMAGE ;;
+					ubuntu-java-postgres) IMAGE=$UBUNTU_JAVA_POSTGRES ;;
 					*) 
 						echo "Invalid image name $2"
 						echo "Expected one of ubuntu, docker, or master"
@@ -305,7 +307,14 @@ function launch() {
 		echo "ERROR: No name specified for the instance."
 		exit 1
 	fi
-	echo "Launching instance $NAME ($FLAVOR)"
+	#echo "Launching instance $NAME ($FLAVOR) with key $KEY"
+	echo "Launching instance"
+	echo "NAME    : $NAME"
+	echo "FLAVOR  : $FLAVOR"
+	echo "IMAGE   : $IMAGE"
+	echo "KEY     : $KEY"
+	echo "GROUP   : $GROUP"
+	echo "NETWORK : $NETWORK"
 	nova boot $NAME \
 		--flavor $FLAVOR \
 		--image $IMAGE \
@@ -477,6 +486,16 @@ case $1 in
 				;;
 			list)
 				nova floating-ip-list
+				;;
+			assign)
+				NAME=$(get_name $3)
+				if [[ $4 = free ]] ; then
+					IP=$(get_free_ip)
+				else
+					IP = $4
+				fi
+				nova floating-ip-associate $NAME $IP
+				echo "Assigned $IP to $NAME"
 				;;
 			*)
 				echo "Unrecognized option. Use list or list-all"
