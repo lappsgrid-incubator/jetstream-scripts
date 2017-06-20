@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+echo "Pull script execution $1" >> /var/log/groovlets.log
 dir=
 case $1 in
     manager|service-manager)
