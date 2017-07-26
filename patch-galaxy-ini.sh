@@ -10,11 +10,11 @@ source=$root/mods/config/galaxy.ini
 dest=$root/galaxy/config/galaxy.ini
 
 if [ -z $PASSWORD ] ; then
-	PASSWORD=$(curl -sSL http://grid.anc.org:9080/password?length=24)	
+	PASSWORD=$(curl -sSL http://api.lappsgrid.org/password?length=24)	
 fi
 
 if [ -z $SECRET ] ; then
-	SECRET=$(curl -sSL http://grid.anc.org:9080/password?length=32\&chars=abcdef0123456789)
+	SECRET=$(curl -sSL http://api.lappsgrid.org/password?length=32\&chars=abcdef0123456789)
 fi
 
 if [ -z $PORT ] ; then
