@@ -344,7 +344,7 @@ function get_name() {
 		ERROR="ERROR: No instance name provided."
 		abort 
 	fi
-	if [[ $1 == lappsgrid* ]] ; then
+	if [[ $1 = lappsgrid* ]] ; then
 		echo $1
 	else
 		echo lappsgrid-$1
