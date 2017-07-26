@@ -3,6 +3,8 @@
 # This is the port that Galaxy will listen on.
 export PORT=80
 
+source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
+
 curl -sSL http://downloads.lappsgrid.org/scripts/install-common.sh | bash
 curl -sSL http://downloads.lappsgrid.org/scripts/install-java.sh | bash
 curl -sSL http://downloads.lappsgrid.org/scripts/install-postgres.sh | bash
@@ -11,7 +13,15 @@ curl -sSL http://downloads.lappsgrid.org/scripts/install-lsd.sh | bash
 set -e
 
 # Install Galaxy (checkout from GitHub).
-adduser galaxy --system --group
+if [[ $OS = ubuntu ]] ; then
+	adduser galaxy --system --group
+elif [[ $OS = redhat* || $OS = centos ]] ; then
+	adduser --system galaxy
+else
+	echo "Unknown Linux flavor: $OS"
+	exit 1
+fi
+
 cd /home/galaxy
 git clone http://github.com/lappsgrid-incubator/Galaxy.git galaxy
 git clone http://github.com/lappsgrid-incubator/GalaxyMods.git mods
