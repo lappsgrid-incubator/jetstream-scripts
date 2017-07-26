@@ -22,6 +22,11 @@ else
 	exit 1
 fi
 
+if [[ ! -e /home/galaxy ]] ; then
+	mkdir /home/galaxy
+	chown galaxy:galaxy /home/galaxy
+fi
+
 cd /home/galaxy
 git clone http://github.com/lappsgrid-incubator/Galaxy.git galaxy
 git clone http://github.com/lappsgrid-incubator/GalaxyMods.git mods
