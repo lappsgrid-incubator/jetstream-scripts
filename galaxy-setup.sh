@@ -33,7 +33,7 @@ git clone http://github.com/lappsgrid-incubator/GalaxyMods.git mods
 
 # Generate a random database password and ID secret for Galaxy
 if [ -z "$PASSWORD" ] ; then
-	export PASSWORD=$(curl -sSL http://api.lappsgrid.org/password?length=24)
+	export PASSWORD=$(curl -sSL http://api.lappsgrid.org/password?length=24\&type=alphanum)
 fi
 if [ -z "$SECRET" ] ; then
 	export SECRET=$(curl -sSL http://api.lappsgrid.org/password?length=32\&type=hex)

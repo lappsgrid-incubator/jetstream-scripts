@@ -32,6 +32,15 @@ else
 fi
 
 if [[ $OS = redhat7 || $OS = centos ]] ; then 
+	hba=/var/lib/pgsql/9.6/data/pg_hba.conf
+	bak=/var/lib/pgsql/9.6/data/pg_hba.conf.bak
+	mv $hba $bak
+	#rm $hba
+	cat $bak | sed 's/ident/password/g' > $hba
+	#echo "local all all password" > $hba
+	#echo "host all all 127.0.0.1/32 password" >> $hba
+	#echo "host all all ::1/128 password" >> $hba
+
     /usr/pgsql-9.6/bin/postgresql96-setup initdb
     systemctl enable postgresql-9.6.service
     systemctl start postgresql-9.6
