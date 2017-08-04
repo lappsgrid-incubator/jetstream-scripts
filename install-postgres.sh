@@ -36,7 +36,7 @@ if [[ $OS = redhat7 || $OS = centos ]] ; then
 	bak=/var/lib/pgsql/9.6/data/pg_hba.conf.bak
 	mv $hba $bak
 	#rm $hba
-	cat $bak | sed 's/ident/password/g' > $hba
+	#cat $bak | sed 's/ident/password/g' > $hba
 	#echo "local all all password" > $hba
 	#echo "host all all 127.0.0.1/32 password" >> $hba
 	#echo "host all all ::1/128 password" >> $hba

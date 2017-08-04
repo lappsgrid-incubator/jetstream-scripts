@@ -72,7 +72,8 @@ function em() {
 
 # The Lappsgrid images that are available on Jetstream.
 #CENTOS_IMAGE=93905450-0714-4336-a9c1-5e0f50aa9209
-CENTOS_IMAGE=217a24b4-2338-4802-8221-fff3bf3fc260
+#CENTOS_IMAGE=217a24b4-2338-4802-8221-fff3bf3fc260
+CENTOS_IMAGE=f2c3fa0b-0ed3-4e98-b256-e33efa5b658d
 UBUNTU_IMAGE=d7fe3289-943f-4417-90e8-8a6b171677ca
 DOCKER_IMAGE=f3847d59-6a90-43da-8666-b58699398b9a
 MASTER_IMAGE=f9e0fa21-6cad-49fc-97db-efd3812fc199
@@ -164,19 +165,19 @@ $(hi COMMANDS)
 	
 $(hi LAUNCH OPTIONS) 
     $(hi -t)|$(hi --tiny)	
-        Launches a tiny instance (1x2)
+        Launches a tiny instance (1x2G)
 	
     $(hi -s)|$(hi --small)	
-        Launches a small instance (2x4)
+        Launches a small instance (2x4G)
 
     $(hi -m)|$(hi --medium)	
-        Launches a medium instance (6x16)
+        Launches a medium instance (6x16G)
 
     $(hi -l)|$(hi --large)	
-        Launches a large instance (10x30)
+        Launches a large instance (10x30G)
 
     $(hi -x)|$(hi --xlarge)
-        Launches an extra large instace (24x60)
+        Launches an extra large instace (24x60G)
         
     $(hi -n)|$(hi --name) <name>
         Specifies the name for the instance.  The name will be prefixed with $(em lappsgrid-) 
