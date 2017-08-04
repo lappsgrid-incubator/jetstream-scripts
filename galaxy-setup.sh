@@ -57,6 +57,10 @@ echo "SECRET  : $SECRET"
 # Now create the database using `sed` to inject the database password into the SQL script.
 curl -sSL http://downloads.lappsgrid.org/scripts/db-setup.sql | sed "s/__DB_PASSWORD__/$PASSWORD/" | sudo -u postgres psql
 
+if [[ $OS = centos ]] ; then
+	echo "alter user galaxy with encrypted password '$PASSWORD'" | sudo -u postgres psql
+fi
+
 # Ensure we are using the correct branch for Galaxy.
 cd /home/galaxy/galaxy
 git checkout lapps
