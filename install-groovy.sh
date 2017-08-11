@@ -9,6 +9,7 @@ ln -s /usr/lib/groovy/groovy-2.4.7 /usr/lib/groovy/current
 # Add Groovy to the default $PATH of all users
 echo 'export GROOVY_HOME=/usr/lib/groovy/current' > /etc/profile.d/groovy.sh
 echo 'export PATH=$GROOVY_HOME/bin:$PATH' >> /etc/profile.d/groovy.sh
+source /etc/profile.d/groovy.sh
 chmod +x /etc/profile.d/groovy.sh
 rm apache-groovy-binary-2.4.7.zip
 
