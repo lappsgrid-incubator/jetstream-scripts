@@ -423,10 +423,17 @@ case $1 in
 		;;
 	proxy)
 		if [ -z $2 ] ; then
-			echo "ERROR: No IP address specified"
+			echo "ERROR: No proxy address specified"
 			exit 1
 		fi
-		ssh -i $PEM root@$PROXY proxy server $2 $3
+		if $(is_ip_address "$2") ; then
+			IP=$2
+		else
+			echo "Getting ip address for $2"
+			IP=$(list_ip $2)
+		fi
+		ssh -i $PEM root@$PROXY proxy server $IP $3
+		echo "If the proxy is enabled traffic to http://jetstream.lappsgrid.org will redirect to $IP"
 		;;
 	forget)
 		#known_hosts=$HOME/.ssh/known_hosts
