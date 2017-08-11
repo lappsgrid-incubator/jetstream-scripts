@@ -11,6 +11,9 @@ elif [[ $OS = ubuntu ]] ; then
 	add-apt-repository ppa:openjdk-r/ppa
 	apt-get update
 	apt-get install -y openjdk-8-jdk
+	# Fixes problem grabbing grapes.  Not sure if this (or equivalent) is needed
+	# on RedHat/CentOS.
+	# See: https://github.com/lappsgrid-incubator/galaxy-appliance/issues/4
 	/var/lib/dpkg/info/ca-certificates-java.postinst configure	
 else
 	echo "Unknown Linux Flavor"
