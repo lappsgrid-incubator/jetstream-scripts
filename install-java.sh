@@ -11,6 +11,7 @@ elif [[ $OS = ubuntu ]] ; then
 	add-apt-repository ppa:openjdk-r/ppa
 	apt-get update
 	apt-get install -y openjdk-8-jdk
+	/var/lib/dpkg/info/ca-certificates-java.postinst configure	
 else
 	echo "Unknown Linux Flavor"
 	exit 1
