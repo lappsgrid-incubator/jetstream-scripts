@@ -19,9 +19,8 @@ curl -sSL http://downloads.lappsgrid.org/scripts/install-docker.sh | bash
 wget http://downloads.lappsgrid.org/ToolConfEditor-latest.tgz
 tar xzf ToolConfEditor-latest.tgz
 chmod +x tce
-mv tcd ToolConfEditor*.jar /usr/local/bin
+mv tce ToolConfEditor*.jar /usr/local/bin
 
 git clone -b develop https://github.com/lappsgrid-incubator/galaxy-appliance
-cd galaxy-example
 
 
