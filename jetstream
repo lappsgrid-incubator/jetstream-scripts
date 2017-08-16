@@ -384,6 +384,11 @@ function get_free_ip {
 	echo `neutron floatingip-list -F fixed_ip_address -F floating_ip_address | grep -v 10.0 | grep 149 | awk '{print $3}' | head -1`
 }
 
+# Expects out put from `[cinder|nova] list --name <name>`
+function get_id {
+	echo $1
+	echo $1 | tail -2 | head -1 | awk '{print $2}'
+}
 # Main program starts here.
 case $1 in
 	test)
@@ -542,6 +547,26 @@ case $1 in
 			  ;;
 		esac		
 		$open http://$IP$port
+		;;
+	attach)
+		server=$2
+		volume=$3
+		iid=`nova list --name $server | tail -2 | head -1 | awk '{print \$2}'`
+		#iid=$(get_id `nova list --name $server`)
+		#echo "Instance ID:  $iid"
+		vid=`cinder list --name $volume | tail -2 | head -1 | awk '{print \$2}'`
+		#echo "Volume: $vid"
+		nova volume-attach $iid $vid auto
+		;;
+	dettach)
+		server=$2
+		volume=$3
+		iid=`nova list --name $server | tail -2 | head -1 | awk '{print \$2}'`
+		#iid=$(get_id `nova list --name $server`)
+		#echo "Instance ID:  $iid"
+		vid=`cinder list --name $volume | tail -2 | head -1 | awk '{print \$2}'`
+		#echo "Volume: $vid"
+		nova volume-dettach $iid $vid
 		;;
 	help)
 		help
