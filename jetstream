@@ -4,8 +4,14 @@ set -e
 # Script for managing VM instances on Jetstream with the OpenStack command
 # line tools.
 
+if [[ $OS_PROJECT_ID != 715* ]] ; then
+	echo "Reloading openrc.sh"
+	source ~/bin/openrc.sh
+fi
+
 # Key installed to instances to enable SSH connections.
 KEY=lappsgrid-shared-key
+#KEY=deiis-shared-key
 #KEY=lappsgrid-suderman-key
 
 # Set PEM to the location of the key. Possession of this key allows the user to
@@ -558,15 +564,15 @@ case $1 in
 		#echo "Volume: $vid"
 		nova volume-attach $iid $vid auto
 		;;
-	dettach)
+	detach)
 		server=$2
 		volume=$3
 		iid=`nova list --name $server | tail -2 | head -1 | awk '{print \$2}'`
 		#iid=$(get_id `nova list --name $server`)
-		#echo "Instance ID:  $iid"
+		echo "Instance ID:  $iid"
 		vid=`cinder list --name $volume | tail -2 | head -1 | awk '{print \$2}'`
-		#echo "Volume: $vid"
-		nova volume-dettach $iid $vid
+		echo "Volume: $vid"
+		nova volume-detach $iid $vid
 		;;
 	help)
 		help

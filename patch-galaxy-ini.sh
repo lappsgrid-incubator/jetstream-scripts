@@ -6,7 +6,7 @@ if [ -z $root ] ; then
 	exit 1
 fi
 
-source=$root/mods/config/galaxy.ini
+src=$root/mods/config/galaxy.ini
 dest=$root/galaxy/config/galaxy.ini
 
 if [ -z $PASSWORD ] ; then
@@ -25,7 +25,7 @@ echo "Password: $PASSWORD"
 echo "Secret  : $SECRET"
 echo "Port    : $PORT"
 
-cat $source | \
+cat $src | \
 	sed "s/__DB_PASSWORD__/$PASSWORD/" | \
 	sed "s/__ID_SECRET__/$SECRET/" | \
 	sed "s/__PORT__/$PORT/" | \

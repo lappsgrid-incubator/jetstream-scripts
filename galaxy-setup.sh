@@ -37,8 +37,8 @@ if [[ ! -e /home/galaxy ]] ; then
 fi
 
 cd /home/galaxy
-git clone http://github.com/lappsgrid-incubator/Galaxy.git galaxy
-git clone http://github.com/lappsgrid-incubator/GalaxyMods.git mods
+git clone -b lapps http://github.com/lappsgrid-incubator/Galaxy.git galaxy
+git clone -b master http://github.com/lappsgrid-incubator/GalaxyMods.git mods
 
 # Generate a random database password and ID secret for Galaxy
 if [ -z "$PASSWORD" ] ; then
@@ -62,11 +62,11 @@ if [[ $OS = centos ]] ; then
 fi
 
 # Ensure we are using the correct branch for Galaxy.
-cd /home/galaxy/galaxy
-git checkout lapps
+#cd /home/galaxy/galaxy
+#git checkout lapps
 
-# Patch the galaxy.ini file with the port number, installation directory, database 
-# password, and id_secret.
+# Patch the galaxy.ini file with the port number, installation directory, 
+# database password, and id_secret.
 wget http://downloads.lappsgrid.org/scripts/patch-galaxy-ini.sh
 chmod +x patch-galaxy-ini.sh
 ./patch-galaxy-ini.sh /home/galaxy

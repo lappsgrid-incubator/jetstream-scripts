@@ -48,6 +48,6 @@ python setup.py install
 #mv make.inc.example make.inc
 #make
 
-pip install pymedtermino nltk scipy numpy sklearn flaskflask werkzeug jinja2 itsdangerous click cssselect
+pip install pymedtermino nltk scipy numpy sklearn flask werkzeug jinja2 itsdangerous click cssselect lxml
 git clone https://github.com/khyathiraghavi/BioAsqLG.git
 
