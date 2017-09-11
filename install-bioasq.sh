@@ -1,4 +1,5 @@
 #!/usr/env/bin bash
+set -e
 
 source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
 
@@ -22,16 +23,14 @@ virtualenv venv
 export ANT=`which ant`
 export PYTHON=`which python`
 export JCC="python -m jcc"
+export JCC_JDK=$JAVA_HOME
 export NUM_FILES=8
 
 wget http://www-us.apache.org/dist/lucene/pylucene/pylucene-6.5.0-src.tar.gz
-tar xzf pylucene/pylucene-6.5.0-src.tar.gz
+tar xzf pylucene-6.5.0-src.tar.gz
 cd pylucene-6.5.0/jcc
-#svn co http://svn.apache.org/repos/asf/lucene/pylucene/trunk/jcc
-#cd jcc
 python setup.py build
 python setup.py install
-
 cd ../
 make
 make install
@@ -49,5 +48,6 @@ python setup.py install
 #make
 
 pip install pymedtermino nltk scipy numpy sklearn flask werkzeug jinja2 itsdangerous click cssselect lxml
+ch /home/bioasq
 git clone https://github.com/khyathiraghavi/BioAsqLG.git
 
