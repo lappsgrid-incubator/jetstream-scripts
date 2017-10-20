@@ -4,10 +4,10 @@ set -e
 # Script for managing VM instances on Jetstream with the OpenStack command
 # line tools.
 
-if [[ $OS_PROJECT_ID != 715* ]] ; then
-	echo "Reloading openrc.sh"
-	source ~/bin/openrc.sh
-fi
+#if [[ $OS_PROJECT_ID != 715* ]] ; then
+#	echo "Reloading openrc.sh"
+#	source ~/bin/openrc.sh
+#fi
 
 # Key installed to instances to enable SSH connections.
 KEY=lappsgrid-shared-key
@@ -84,6 +84,7 @@ UBUNTU_IMAGE=d7fe3289-943f-4417-90e8-8a6b171677ca
 DOCKER_IMAGE=f3847d59-6a90-43da-8666-b58699398b9a
 MASTER_IMAGE=f9e0fa21-6cad-49fc-97db-efd3812fc199
 UBUNTU_JAVA_POSTGRES=9b96fac5-38a7-4052-b2f9-e6b29dff7e45
+PROXY_IMAGE=90b43fe0-7ece-460e-85bf-92d939964f7f 
 
 # Default values used when launching an image.
 IMAGE=$UBUNTU_IMAGE
@@ -292,11 +293,13 @@ function launch() {
 					master) IMAGE=$MASTER_IMAGE ;;
 					centos) IMAGE=$CENTOS_IMAGE ;;
 					ubuntu-java-postgres) IMAGE=$UBUNTU_JAVA_POSTGRES ;;
+					proxy) IMAGE=$PROXY_IMAGE ;;
 					*) 
-						echo "Invalid image name $2"
-						echo "Expected one of ubuntu, docker, or master"
-						exit 1
-					;;
+						#echo "Invalid image name $2"
+						#echo "Expected one of ubuntu, docker, or master"
+						#exit 1
+						IMAGE=$2
+						;;
 				esac
 				shift
 				;;
@@ -316,6 +319,8 @@ function launch() {
 		exit 1
 	fi
 	#echo "Launching instance $NAME ($FLAVOR) with key $KEY"
+	#NETWORK=genapp-net
+	#GROUP=default
 	echo "Launching instance"
 	echo "NAME    : $NAME"
 	echo "FLAVOR  : $FLAVOR"

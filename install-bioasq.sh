@@ -1,22 +1,26 @@
-#!/usr/env/bin bash
+#!/usr/bin/env bash
 set -e
 
 source <(curl -sSL http://downloads.lappsgrid.org/scripts/sniff.sh)
 
+
 if [[ -z $JAVA_HOME ]] ; then
 	echo "JAVA_HOME has not been set."
-	exit 1
+	echo "Assuming Java should be installed."
+	curl -sSL http://downloads.lappsgrid.org/scripts/install-java.sh | bash
+	#TODO This is fragile and should be fixed!
+	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 fi
-export JCC_JDK=$JAVA_HOME
 
 if [[ $OS = ubuntu ]] ; then
-	apt-get install -y python-pip python-virtualenv python-dev git subversion emacs24-nox ant libblas-dev liblapack-dev libatlas-base-dev gfortran libxml2-dev libxslt1-dev zlib1g-dev
+	apt-get install -y python-pip python-virtualenv python-dev python-numpy python-scipy python-matplotlib git subversion emacs24-nox ant libblas-dev liblapack-dev libatlas-base-dev gfortran libxml2-dev libxslt1-dev zlib1g-dev
 else
 	echo "Unsupported OS: $OS"
 	exit 1
 fi
 
-mkdir /home/bioasq
+#mkdir /home/bioasq
+adduser bioasq --system --group
 cd /home/bioasq
 virtualenv venv
 
@@ -47,7 +51,8 @@ python setup.py install
 #mv make.inc.example make.inc
 #make
 
-pip install pymedtermino nltk scipy numpy sklearn flask werkzeug jinja2 itsdangerous click cssselect lxml
-ch /home/bioasq
+#pip install pymedtermino nltk numpy scipy sklearn flask werkzeug jinja2 itsdangerous click cssselect lxml
+pip install pymedtermino nltk sklearn flask werkzeug jinja2 itsdangerous click cssselect lxml
+cd /home/bioasq
 git clone https://github.com/khyathiraghavi/BioAsqLG.git
 

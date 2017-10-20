@@ -1,0 +1,46 @@
+# The following variables should be set in the .env file
+# datasource - the Docker image for the generic-datasource
+# target     - where the generic datasource looks for data
+# coref      - data directory for the coref corpus
+# reference  - same as above
+# protein    - same as above
+# semeval    - same as above
+
+registry:
+  image: registry:2
+  ports:
+    - 127.0.0.1:8500:5000
+  environment:
+    REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
+  volumes:
+    - /var/lib/docker:/data
+coref:
+  image: ${datasource}
+  ports:
+    - 8080:8080
+  volumes:
+    - ${coref}/${target}
+reference:
+  image: ${datasource}
+  ports:
+    - 8081:8080
+  volumes:
+    - ${reference}/${target}
+proteins:
+  image: ${datasource}
+  ports:
+    - 8082:8080
+  volumes:
+    - ${proteins}/${target}
+semeval:
+  image: ${datasource}
+  ports:
+    - 8083:8080
+  volumes:
+    - ${semeval}/${target}
+api:
+  image: lappsgrid/api-service:latest
+  ports:
+    - 8084:8080
+  volumes:
+    - /etc/lapps:/etc/lapps
