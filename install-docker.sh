@@ -18,11 +18,30 @@ echo "Installing Docker."
 
 # This installs the experimental/beta version of docker which is needed for some of the
 # newer docker compose / docker swarm features.
-curl -sSL https://experimental.docker.com/ | sh
+#curl -sSL https://experimental.docker.com/ | sh
 
-echo "Installing Docker Compose."
-curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/bin/docker-compose
-chmod +x /usr/bin/docker-compose
+#echo "Installing Docker Compose."
+#curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/bin/docker-compose
+#chmod +x /usr/bin/docker-compose
+
+# Remove old versions.  It is safe to ignore warnings that the packages
+# do not exist.
+apt-get remove docker docker-engine docker.io
+apt-get update
+
+# Enable HTTPS
+apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+
+# Add the Docker's official GPG key
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+# Add the Docker repository.
+add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+   
+apt-get install -y docker-ce
 
 if [[ $OS = centos ]] ; then
 	systemctl start docker
