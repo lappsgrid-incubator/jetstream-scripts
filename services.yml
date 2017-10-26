@@ -7,7 +7,6 @@
 # semeval    - same as above
 
 version: "3"
-env_file: .env
 
 services:
     registry:
@@ -21,35 +20,35 @@ services:
       deploy:
         replicas: 1
     coref:
-      image: ${datasource}
+      image: lappsgrid/generic-datasource:latest
       ports:
         - 8080:8080
       volumes:
-        - ${coref}/${target}
+        - /var/lib/corora/BIONLP2016/bionlp-st-ge-2016-coref:/var/lib/datasource
       deploy:
         replicas: 1
     reference:
-      image: ${datasource}
+      image: lappsgrid/generic-datasource:latest
       ports:
         - 8081:8080
       volumes:
-        - ${reference}/${target}
+        - /var/lib/corora/BIONLP2016/bionlp-st-ge-2016-reference:/var/lib/datasource
       deploy:
         replicas: 1
     proteins:
-      image: ${datasource}
+      image: lappsgrid/generic-datasource:latest
       ports:
         - 8082:8080
       volumes:
-        - ${proteins}/${target}
+        - /var/lib/corora/BIONLP2016/bionlp-st-ge-2016-test-proteins:/var/lib/datasource
       deploy:
         replicas: 1
     semeval:
-      image: ${datasource}
+      image: lappsgrid/generic-datasource:latest
       ports:
         - 8083:8080
       volumes:
-        - ${semeval}/${target}
+        - /var/lib/corpora/SEMEVAL2017:/var/lib/datasource
       deploy:
         replicas: 1
     api:
