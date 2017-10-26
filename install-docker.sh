@@ -41,6 +41,7 @@ add-apt-repository \
    $(lsb_release -cs) \
    stable"
    
+apt-get update
 apt-get install -y docker-ce
 
 if [[ $OS = centos ]] ; then
