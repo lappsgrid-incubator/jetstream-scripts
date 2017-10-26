@@ -26,7 +26,7 @@ echo "Installing Docker."
 
 # Remove old versions.  It is safe to ignore warnings that the packages
 # do not exist.
-apt-get remove docker docker-engine docker.io
+apt-get remove -y docker docker-engine docker.io
 apt-get update
 
 # Enable HTTPS
