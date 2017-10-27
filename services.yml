@@ -6,13 +6,22 @@
 # protein    - same as above
 # semeval    - same as above
 
-version: "3"
+version: "3.4"
 
+secrets:
+  api.ini:
+    external: true
+networks:
+  hostnet:
+    external:
+      name: host  
 services:
     registry:
       image: registry:2
       ports:
         - 127.0.0.1:8500:5000
+      networks:
+        hostnet: {}
       environment:
         REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
       volumes:
@@ -23,6 +32,8 @@ services:
       image: lappsgrid/generic-datasource:latest
       ports:
         - 8080:8080
+      networks:
+        hostnet: {}
       volumes:
         - /var/lib/corora/BIONLP2016/bionlp-st-ge-2016-coref:/var/lib/datasource
       deploy:
@@ -31,6 +42,8 @@ services:
       image: lappsgrid/generic-datasource:latest
       ports:
         - 8081:8080
+      networks:
+        hostnet: {}
       volumes:
         - /var/lib/corora/BIONLP2016/bionlp-st-ge-2016-reference:/var/lib/datasource
       deploy:
@@ -39,6 +52,8 @@ services:
       image: lappsgrid/generic-datasource:latest
       ports:
         - 8082:8080
+      networks:
+        hostnet: {}
       volumes:
         - /var/lib/corora/BIONLP2016/bionlp-st-ge-2016-test-proteins:/var/lib/datasource
       deploy:
@@ -47,6 +62,8 @@ services:
       image: lappsgrid/generic-datasource:latest
       ports:
         - 8083:8080
+      networks:
+        hostnet: {}
       volumes:
         - /var/lib/corpora/SEMEVAL2017:/var/lib/datasource
       deploy:
@@ -58,7 +75,15 @@ services:
       secrets:
         - source: api.ini
           target: /etc/lapps/api.ini 
-#      volumes:
-#        - /etc/lapps:/etc/lapps
+      networks:
+        hostnet: {}
+      deploy:
+        replicas: 1
+    gate:
+      image: lappsgrid/gate
+      ports:
+        - 8085:8080
+      networks:
+        hostnet: {}
       deploy:
         replicas: 1
