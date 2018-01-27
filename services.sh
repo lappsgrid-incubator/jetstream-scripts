@@ -37,7 +37,7 @@ function start() {
 	name=$2
 	dir=$3
 	
-	echo "docker run -d -p $port:8080 --name $name -v $dir:$target $image"
+	docker run -d -p $port:8080 --name $name -v $dir:$target $image
 }
 
 function start_all() {
@@ -45,11 +45,11 @@ function start_all() {
 	start 8081 reference $reference
 	start 8082 proteins $proteins
 	start 8083 semeval $semeval
-	docker run -d -p 8084:8080 --name api -v /etc/lapps:/etc/lapps $api
+	docker run -d -p 8084:8080 --name api -v $etc_lapps:/etc/lapps $api
 }
 
 function stop() {
-	echo "docker rm -f $1"
+	docker rm -f $1
 }
 
 case $1 in
@@ -71,7 +71,7 @@ case $1 in
 				start 8083 semeval $semeval
 				;;
 			api)
-				docker run -d -p 8084:8080 --name api -v /etc/lapps:/etc/lapps $api
+				docker run -d -p 8084:8080 --name api -v $etc_lapps:/etc/lapps $api
 				;;
 			*)
 				echo "Invalid image name: $2"
@@ -101,11 +101,7 @@ case $1 in
 				docker pull $api
 				docker pull $image
 				start_all
-				;;
-			
-			*)
-				echo "Unknow repository $2"
-				;;
+				;;	
 			coref)
 				stop $2
 				docker pull $image
@@ -129,7 +125,10 @@ case $1 in
 			api)
 				stop $2
 				docker pull $api
-				docker run -d -p 8084:8080 --name api -v /etc/lapps:/etc/lapps $api
+				docker run -d -p 8084:8080 --name api -v $etc_lapps:/etc/lapps $api
+				;;
+			*)
+				echo "Unknow repository $2"
 				;;
 		esac
     *)
