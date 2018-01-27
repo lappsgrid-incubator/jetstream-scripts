@@ -11,10 +11,17 @@ version: "3.4"
 secrets:
   api.ini:
     external: true
-networks:
-  hostnet:
-    external:
-      name: host  
+    
+volumes:
+  coref:
+    external: true
+  reference:
+    external: true
+  proteins:
+    external: true
+  semeval:
+    external: true
+  
 services:
     registry:
       image: registry:2
@@ -35,7 +42,7 @@ services:
       networks:
         hostnet: {}
       volumes:
-        - /var/lib/corora/BIONLP2016/bionlp-st-ge-2016-coref:/var/lib/datasource
+        - coref:/var/lib/datasource
       deploy:
         replicas: 1
     reference:
@@ -45,7 +52,7 @@ services:
       networks:
         hostnet: {}
       volumes:
-        - /var/lib/corora/BIONLP2016/bionlp-st-ge-2016-reference:/var/lib/datasource
+        - reference:/var/lib/datasource
       deploy:
         replicas: 1
     proteins:
@@ -55,7 +62,7 @@ services:
       networks:
         hostnet: {}
       volumes:
-        - /var/lib/corora/BIONLP2016/bionlp-st-ge-2016-test-proteins:/var/lib/datasource
+        - proteins:/var/lib/datasource
       deploy:
         replicas: 1
     semeval:
