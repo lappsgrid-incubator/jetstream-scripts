@@ -16,6 +16,7 @@ fi
 # Images used
 api=lappsgrid/api-service:latest
 image=lappsgrid/generic-datasource:latest
+pubannotation=docker.lappsgrid.org/lappsgrid/pubannotation
 
 # Directory configuration
 target=/var/lib/datasource
@@ -30,7 +31,7 @@ semeval=$base/SEMEVAL2017
 
 # Container lists
 DATASOURCES="coref reference proteins semeval"
-CONTAINERS="$DATASOURCES api"
+CONTAINERS="$DATASOURCES api pubannotation"
 
 function start() {
 	port=$1
@@ -40,12 +41,21 @@ function start() {
 	docker run -d -p $port:8080 --name $name -v $dir:$target $image
 }
 
+function start_api() {
+	docker run -d -p 8084:8080 --name api -v $etc_lapps:/etc/lapps $api
+}
+
+function start_pubannotation() {
+	docker run -d -p 8085:8080 --name pubannotation $pubannotation
+}
+
 function start_all() {
 	start 8080 coref $coref
 	start 8081 reference $reference
 	start 8082 proteins $proteins
 	start 8083 semeval $semeval
-	docker run -d -p 8084:8080 --name api -v $etc_lapps:/etc/lapps $api
+	start_api
+	start_pubannotation
 }
 
 function stop() {
@@ -71,7 +81,10 @@ case $1 in
 				start 8083 semeval $semeval
 				;;
 			api)
-				docker run -d -p 8084:8080 --name api -v $etc_lapps:/etc/lapps $api
+				start_api
+				;;
+			pubannotation)
+				start_pubannotation
 				;;
 			*)
 				echo "Invalid image name: $2"
@@ -84,7 +97,7 @@ case $1 in
 					stop $image
 				done
 				;;
-			coref|reference|proteins|semeval|api)
+			coref|reference|proteins|semeval|api|pubannotation)
 				stop $2
 				;;
 			*)
@@ -100,6 +113,7 @@ case $1 in
 				done
 				docker pull $api
 				docker pull $image
+				docker pull $pubannotation
 				start_all
 				;;	
 			coref)
@@ -125,12 +139,18 @@ case $1 in
 			api)
 				stop $2
 				docker pull $api
-				docker run -d -p 8084:8080 --name api -v $etc_lapps:/etc/lapps $api
+				start_api
+				;;
+			pubannotation)
+				stop $2
+				docker pull $pubannotation
+				start_pubannotation
 				;;
 			*)
 				echo "Unknow repository $2"
 				;;
 		esac
+		;;
     *)
 		echo "Unknown command $1"
 		;;
