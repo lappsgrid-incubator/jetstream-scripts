@@ -17,6 +17,8 @@ fi
 api=lappsgrid/api-service:latest
 image=lappsgrid/generic-datasource:latest
 pubannotation=docker.lappsgrid.org/lappsgrid/pubannotation
+vaers=docker.lappsgrid.org/cdc/vaers
+ctakes=docker.lappsgrid.org/cdc/ctakes
 
 # Directory configuration
 target=/var/lib/datasource
@@ -31,7 +33,8 @@ semeval=$base/SEMEVAL2017
 
 # Container lists
 DATASOURCES="coref reference proteins semeval"
-CONTAINERS="$DATASOURCES api pubannotation"
+CDC="vaers ctakes xcas-converter"
+CONTAINERS="$DATASOURCES $CDC api pubannotation"
 
 function start() {
 	port=$1
@@ -39,6 +42,13 @@ function start() {
 	dir=$3
 	
 	docker run -d -p $port:8080 --name $name -v $dir:$target $image
+}
+
+function start_cdc() {
+	port=$1
+	name=$2
+	
+	docker run -d -p $port:8080 --name $name docker.lappsgrid.org/cdc/$name
 }
 
 function start_api() {
@@ -49,6 +59,14 @@ function start_pubannotation() {
 	docker run -d -p 8085:8080 --name pubannotation $pubannotation
 }
 
+function start_vaers() {
+    docker run -d -p 8086:8080 --name vaers $vaers
+}
+
+function start_ctakes() {
+    docker run -d -p 8087:8080 --name ctakes $ctakes
+}
+
 function start_all() {
 	start 8080 coref $coref
 	start 8081 reference $reference
@@ -56,6 +74,9 @@ function start_all() {
 	start 8083 semeval $semeval
 	start_api
 	start_pubannotation
+	start_cdc 8086 vaers
+	start_cdc 8087 ctakes
+	start_cdc 8088 xcas
 }
 
 function stop() {
@@ -86,6 +107,15 @@ case $1 in
 			pubannotation)
 				start_pubannotation
 				;;
+	        vaers) 
+		        start_cdc 8086 vaers
+				;;
+	        ctakes)
+	            start_cdc 8087 ctakes
+				;;
+			xcas)
+				start_cdc 8088 xcas
+				;;
 			*)
 				echo "Invalid image name: $2"
 		esac
@@ -97,7 +127,7 @@ case $1 in
 					stop $image
 				done
 				;;
-			coref|reference|proteins|semeval|api|pubannotation)
+			coref|reference|proteins|semeval|api|pubannotation|ctakes|vaers|xcas)
 				stop $2
 				;;
 			*)
@@ -114,6 +144,7 @@ case $1 in
 				docker pull $api
 				docker pull $image
 				docker pull $pubannotation
+				docker pull $vaers
 				start_all
 				;;	
 			coref)
@@ -145,6 +176,21 @@ case $1 in
 				stop $2
 				docker pull $pubannotation
 				start_pubannotation
+				;;
+			vaers)
+				stop $2
+				docker pull docker.lappsgrid.org/cdc/vaers
+				start_cdc 8086 vaers
+				;;
+		    ctakes)
+		        stop $2
+				docker pull docker.lappsgrid.org/cdc/ctakes
+				start_cdc 8087 ctakes
+				;;
+		    xcas)
+		        stop $2
+				docker pull docker.lappsgrid.org/cdc/xcas
+				start_cdc 8088 xcas
 				;;
 			*)
 				echo "Unknow repository $2"
