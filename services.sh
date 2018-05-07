@@ -17,6 +17,7 @@ fi
 api=lappsgrid/api-service:latest
 image=lappsgrid/generic-datasource:latest
 pubannotation=docker.lappsgrid.org/lappsgrid/pubannotation
+paconvert=docker.lappsgrid.org/lappsgrid/pubannotation-converter
 vaers=docker.lappsgrid.org/cdc/vaers
 ctakes=docker.lappsgrid.org/cdc/ctakes
 
@@ -34,7 +35,7 @@ semeval=$base/SEMEVAL2017
 # Container lists
 DATASOURCES="coref reference proteins semeval"
 CDC="vaers ctakes xcas-converter"
-CONTAINERS="$DATASOURCES $CDC api pubannotation"
+CONTAINERS="$DATASOURCES $CDC api pubannotation paconvert"
 
 function start() {
 	port=$1
@@ -67,6 +68,10 @@ function start_ctakes() {
     docker run -d -p 8087:8080 --name ctakes $ctakes
 }
 
+function start_paconvert() {
+	docker run -d -p 8089:8080 --name paconvert $paconvert
+}
+
 function start_all() {
 	start 8080 coref $coref
 	start 8081 reference $reference
@@ -74,6 +79,7 @@ function start_all() {
 	start 8083 semeval $semeval
 	start_api
 	start_pubannotation
+	start_paconvert
 	start_cdc 8086 vaers
 	start_cdc 8087 ctakes
 	start_cdc 8088 xcas
@@ -107,6 +113,9 @@ case $1 in
 			pubannotation)
 				start_pubannotation
 				;;
+			paconvert)
+				start_paconvert
+				;;
 	        vaers) 
 		        start_cdc 8086 vaers
 				;;
@@ -127,7 +136,7 @@ case $1 in
 					stop $image
 				done
 				;;
-			coref|reference|proteins|semeval|api|pubannotation|ctakes|vaers|xcas)
+			coref|reference|proteins|semeval|api|pubannotation|ctakes|vaers|xcas|paconvert)
 				stop $2
 				;;
 			*)
@@ -144,6 +153,7 @@ case $1 in
 				docker pull $api
 				docker pull $image
 				docker pull $pubannotation
+				docker pull $paconvert
 				docker pull $vaers
 				start_all
 				;;	
@@ -176,6 +186,11 @@ case $1 in
 				stop $2
 				docker pull $pubannotation
 				start_pubannotation
+				;;
+			paconvert)
+				stop $2
+				docker pull $paconvert
+				start_paconvert
 				;;
 			vaers)
 				stop $2
