@@ -15,7 +15,7 @@ fi
 
 # Images used
 api=lappsgrid/api-service:latest
-image=lappsgrid/generic-datasource:1.2.0
+image=lappsgrid/generic-datasource:1.2.1
 pubannotation=docker.lappsgrid.org/lappsgrid/pubannotation
 paconvert=docker.lappsgrid.org/lappsgrid/pubannotation-converter
 vaers=docker.lappsgrid.org/cdc/vaers
