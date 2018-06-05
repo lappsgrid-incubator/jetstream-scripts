@@ -20,6 +20,7 @@ pubannotation=docker.lappsgrid.org/lappsgrid/pubannotation
 paconvert=docker.lappsgrid.org/lappsgrid/pubannotation-converter
 vaers=docker.lappsgrid.org/cdc/vaers
 ctakes=docker.lappsgrid.org/cdc/ctakes
+uima2lif=docker.lappsgrid.org/cdc/uima2lif
 
 # Directory configuration
 target=/var/lib/datasource
@@ -34,7 +35,7 @@ semeval=$base/SEMEVAL2017
 
 # Container lists
 DATASOURCES="coref reference proteins semeval"
-CDC="vaers ctakes xcas-converter"
+CDC="vaers ctakes uima2lif"
 CONTAINERS="$DATASOURCES $CDC api pubannotation paconvert"
 
 function start() {
@@ -122,8 +123,8 @@ case $1 in
 	        ctakes)
 	            start_cdc 8087 ctakes
 				;;
-			xcas)
-				start_cdc 8088 xcas
+			uima2lif)
+				start_cdc 8088 uima2lif
 				;;
 			*)
 				echo "Invalid image name: $2"
@@ -136,7 +137,7 @@ case $1 in
 					stop $image
 				done
 				;;
-			coref|reference|proteins|semeval|api|pubannotation|ctakes|vaers|xcas|paconvert)
+			coref|reference|proteins|semeval|api|pubannotation|ctakes|vaers|uima2lif|paconvert)
 				stop $2
 				;;
 			*)
@@ -155,6 +156,7 @@ case $1 in
 				docker pull $pubannotation
 				docker pull $paconvert
 				docker pull $vaers
+				docker pull $uima2lif
 				start_all
 				;;	
 			coref)
@@ -202,10 +204,10 @@ case $1 in
 				docker pull docker.lappsgrid.org/cdc/ctakes
 				start_cdc 8087 ctakes
 				;;
-		    xcas)
+		    uima2lif)
 		        stop $2
-				docker pull docker.lappsgrid.org/cdc/xcas
-				start_cdc 8088 xcas
+				docker pull $uima2lif
+				start_cdc 8088 uima2lif
 				;;
 			*)
 				echo "Unknow repository $2"
