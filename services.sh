@@ -23,6 +23,7 @@ paconvert=docker.lappsgrid.org/lappsgrid/pubannotation-converter
 vaers=docker.lappsgrid.org/cdc/vaers
 ctakes=docker.lappsgrid.org/cdc/ctakes
 uima2lif=docker.lappsgrid.org/cdc/uima2lif
+udpipe=docker.lappsgrid.org/lappsgrid/udpipe
 
 # Directory configuration
 target=/var/lib/datasource
@@ -38,7 +39,7 @@ semeval=$base/SEMEVAL2017
 # Container lists
 DATASOURCES="coref reference proteins semeval"
 CDC="vaers ctakes uima2lif"
-CONTAINERS="$DATASOURCES $CDC api pubannotation paconvert"
+CONTAINERS="$DATASOURCES $CDC api pubannotation paconvert udpipe"
 
 function start() {
 	port=$1
@@ -60,7 +61,11 @@ function start_api() {
 }
 
 function start_pubannotation() {
-	docker run -d -p PUBANNOTATION_PORT:8080 --name pubannotation $pubannotation
+	docker run -d -p $PUBANNOTATION_PORT:8080 --name pubannotation $pubannotation
+}
+
+function start_udpipe() {
+	docker run -d -p $UDPIPE_PORT:8080 --name udpipe $udpipe
 }
 
 #function start_vaers() {
@@ -83,6 +88,7 @@ function start_all() {
 	start_api
 	start_pubannotation
 	start_paconvert
+	start_udpipe
 	#start_cdc 8086 vaers
 	#start_cdc 8087 ctakes
 	#start_cdc 8088 xcas
@@ -142,6 +148,10 @@ case $1 in
 			uima2lif)
 				start_cdc $UIMA2LIF_PORT uima2lif
 				;;
+			udpipe)
+				start_udpipe
+
+				;;
 			*)
 				echo "Invalid image name: $2"
 		esac
@@ -153,7 +163,7 @@ case $1 in
 					stop $image
 				done
 				;;
-			coref|reference|proteins|semeval|api|pubannotation|ncbo|ethernlp|ethernlp-service|uima2lif|paconvert)
+			coref|reference|proteins|semeval|api|pubannotation|ncbo|ethernlp|ethernlp-service|uima2lif|paconvert|udpipe)
 				stop $2
 				;;
 			clinical|temporal)
@@ -176,6 +186,7 @@ case $1 in
 				docker pull $paconvert
 				docker pull $vaers
 				docker pull $uima2lif
+				docker pull $udpipe
 				start_all
 				;;	
 			coref)
@@ -242,6 +253,11 @@ case $1 in
 		        stop $2
 				docker pull $uima2lif
 				start_cdc $UIMA2LIF_PORT uima2lif
+				;;
+			udpipe)
+				stop $2
+				docker pull $2
+				start_udpipe
 				;;
 			*)
 				echo "Unknow repository $2"
