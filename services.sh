@@ -13,6 +13,8 @@ if [ "$OSTYPE" = "darwin16" ] ; then
 	etc_lapps=/private/etc/lapps
 fi
 
+source ports.sh
+
 # Images used
 api=lappsgrid/api-service:latest
 image=lappsgrid/generic-datasource:1.2.1
@@ -21,6 +23,7 @@ paconvert=docker.lappsgrid.org/lappsgrid/pubannotation-converter
 vaers=docker.lappsgrid.org/cdc/vaers
 ctakes=docker.lappsgrid.org/cdc/ctakes
 uima2lif=docker.lappsgrid.org/cdc/uima2lif
+udpipe=docker.lappsgrid.org/lappsgrid/udpipe
 
 # Directory configuration
 target=/var/lib/datasource
@@ -36,7 +39,7 @@ semeval=$base/SEMEVAL2017
 # Container lists
 DATASOURCES="coref reference proteins semeval"
 CDC="vaers ctakes uima2lif"
-CONTAINERS="$DATASOURCES $CDC api pubannotation paconvert"
+CONTAINERS="$DATASOURCES $CDC api pubannotation paconvert udpipe"
 
 function start() {
 	port=$1
@@ -54,36 +57,46 @@ function start_cdc() {
 }
 
 function start_api() {
-	docker run -d -p 8084:8080 --name api -v $etc_lapps:/etc/lapps $api
+	docker run -d -p $API_PORT:8080 --name api -v $etc_lapps:/etc/lapps $api
 }
 
 function start_pubannotation() {
-	docker run -d -p 8085:8080 --name pubannotation $pubannotation
+	docker run -d -p $PUBANNOTATION_PORT:8080 --name pubannotation $pubannotation
 }
 
-function start_vaers() {
-    docker run -d -p 8086:8080 --name vaers $vaers
+function start_udpipe() {
+	docker run -d -p $UDPIPE_PORT:8080 --name udpipe $udpipe
 }
 
-function start_ctakes() {
-    docker run -d -p 8087:8080 --name ctakes $ctakes
-}
+#function start_vaers() {
+#    docker run -d -p 8086:8080 --name vaers $vaers
+#}
+
+#function start_ctakes() {
+#    docker run -d -p 8087:8080 --name ctakes $ctakes
+#}
 
 function start_paconvert() {
-	docker run -d -p 8089:8080 --name paconvert $paconvert
+	docker run -d -p $PACONVERT_PORT:8080 --name paconvert $paconvert
 }
 
 function start_all() {
-	start 8080 coref $coref
-	start 8081 reference $reference
-	start 8082 proteins $proteins
-	start 8083 semeval $semeval
+	start DATA_COREF_PORT coref $coref
+	start DATA_REFERENCE_PORT reference $reference
+	start DATA_PROTEINS_PORT proteins $proteins
+	start DATA_SEMEVAL_PORT semeval $semeval
 	start_api
 	start_pubannotation
 	start_paconvert
-	start_cdc 8086 vaers
-	start_cdc 8087 ctakes
-	start_cdc 8088 xcas
+	start_udpipe
+	#start_cdc 8086 vaers
+	#start_cdc 8087 ctakes
+	#start_cdc 8088 xcas
+	start_cdc $CTAKES_CLINICAL_PORT ctakes-clinical
+	start_cdc $CTAKES_TEMPORAL_PORT ctakes-temporal
+	start_cdc $ETHERNLP_PORT ethernlp
+	start_cdc $NCBO_PORT ncbo
+	start_cdc $UIMA2LIF_PORT uima2lif
 }
 
 function stop() {
@@ -97,16 +110,16 @@ case $1 in
     			start_all
 				;;
 			coref)
-				start 8080 coref $coref
+				start $DATA_COREF_PORT coref $coref
 				;;
 			reference)
-				start 8081 reference $reference
+				start $DATA_REFERENCE_PORT reference $reference
 				;;
 			proteins)
-				start 8082 proteins $proteins
+				start $DATA_PROTEINS_PORT proteins $proteins
 				;;
 			semeval)
-				start 8083 semeval $semeval
+				start $DATA_SEMEVAL_PORT semeval $semeval
 				;;
 			api)
 				start_api
@@ -117,14 +130,26 @@ case $1 in
 			paconvert)
 				start_paconvert
 				;;
-	        vaers) 
-		        start_cdc 8086 vaers
+	        clinical) 
+		        start_cdc $CTAKES_CLINICAL_PORT ctakes-clinical
 				;;
-	        ctakes)
-	            start_cdc 8087 ctakes
+	        temporal)
+	            start_cdc $CTAKES_TEMPORAL_PORT ctakes-temporal
+				;;
+			ncbo)
+				start_cdc $NCBO_PORT ncbo
+				;;
+			ethernlp)
+				start_cdc $ETHERNLP_PORT ethernlp
+				;;
+			ethernlp-service)
+				start_cdc $ENTERNLP_SERVICE_PORT ethernlp-service
 				;;
 			uima2lif)
-				start_cdc 8088 uima2lif
+				start_cdc $UIMA2LIF_PORT uima2lif
+				;;
+			udpipe)
+				start_udpipe
 				;;
 			*)
 				echo "Invalid image name: $2"
@@ -137,8 +162,11 @@ case $1 in
 					stop $image
 				done
 				;;
-			coref|reference|proteins|semeval|api|pubannotation|ctakes|vaers|uima2lif|paconvert)
+			coref|reference|proteins|semeval|api|pubannotation|ncbo|ethernlp|ethernlp-service|uima2lif|paconvert|udpipe)
 				stop $2
+				;;
+			clinical|temporal)
+				stop ctakes-$2
 				;;
 			*)
 				echo "Invalid image name: $2"
@@ -157,27 +185,28 @@ case $1 in
 				docker pull $paconvert
 				docker pull $vaers
 				docker pull $uima2lif
+				docker pull $udpipe
 				start_all
 				;;	
 			coref)
 				stop $2
 				docker pull $image
-				start 8080 coref $coref
+				start $DATA_COREF_PORT coref $coref
 				;;
 			reference)
 				stop $2
 				docker pull $image
-				start 8081 reference $reference
+				start $DATA_REFERENCE_PORT reference $reference
 				;;
 			proteins)
 				stop $2
 				docker pull $image
-				start 8082 proteins $proteins
+				start $DATA_PROTEINS_PORT proteins $proteins
 				;;
 			semeval)
 				stop $2
 				docker pull $image
-				start 8083 semeval $semeval
+				start $DATA_SEMEVAL_PORT semeval $semeval
 				;;
 			api)
 				stop $2
@@ -194,20 +223,40 @@ case $1 in
 				docker pull $paconvert
 				start_paconvert
 				;;
-			vaers)
-				stop $2
-				docker pull docker.lappsgrid.org/cdc/vaers
-				start_cdc 8086 vaers
+		    clinical)
+		        stop ctakes-$2
+				docker pull docker.lappsgrid.org/cdc/ctakes-$2
+				start_cdc $CTAKES_CLINICAL_PORT ctakes-$2	
 				;;
-		    ctakes)
-		        stop $2
-				docker pull docker.lappsgrid.org/cdc/ctakes
-				start_cdc 8087 ctakes
+		    temporal)
+		        stop ctakes-$2
+				docker pull docker.lappsgrid.org/cdc/ctakes-$2
+				start_cdc $CTAKES_TEMPORAL_PORT ctakes-$2	
+				;;
+			ncbo)
+				stop ncbo
+				docker pull docker.lappsgrid.org/cdc/ncbo
+				start_cdc $NCBO_PORT ncbo
+				;;
+			ethernlp)
+				stop ethernlp
+				docker pull docker.lappsgrid.org/cdc/ethernlp
+				start_cdc $ETHERNLP_PORT ethernlp
+				;;
+			ethernlp-service)
+				stop ethernlp-service
+				docker pull docker.lappsgrid.org/cdc/ethernlp-service
+				start_cdc $ETHERNLP_SERVICE_PORT ethernlp-service
 				;;
 		    uima2lif)
 		        stop $2
 				docker pull $uima2lif
-				start_cdc 8088 uima2lif
+				start_cdc $UIMA2LIF_PORT uima2lif
+				;;
+			udpipe)
+				stop $2
+				docker pull $2
+				start_udpipe
 				;;
 			*)
 				echo "Unknow repository $2"
