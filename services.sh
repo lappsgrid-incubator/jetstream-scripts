@@ -255,7 +255,7 @@ case $1 in
 				;;
 			udpipe)
 				stop $2
-				docker pull $2
+				docker pull $udpipe
 				start_udpipe
 				;;
 			*)
