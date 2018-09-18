@@ -51,7 +51,7 @@ function start_datasource() {
 }
 
 function start() {
-	container$1
+	container=$1
 	name=$2
 	port=$3
 	
