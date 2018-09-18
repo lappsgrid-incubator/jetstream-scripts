@@ -24,6 +24,7 @@ vaers=docker.lappsgrid.org/cdc/vaers
 ctakes=docker.lappsgrid.org/cdc/ctakes
 uima2lif=docker.lappsgrid.org/cdc/uima2lif
 udpipe=docker.lappsgrid.org/lappsgrid/udpipe
+stanford=docker.lappsgrid.org/lappsgrid/stanford:gdd
 
 # Directory configuration
 target=/var/lib/datasource
@@ -39,14 +40,22 @@ semeval=$base/SEMEVAL2017
 # Container lists
 DATASOURCES="coref reference proteins semeval"
 CDC="vaers ctakes uima2lif"
-CONTAINERS="$DATASOURCES $CDC api pubannotation paconvert udpipe"
+CONTAINERS="$DATASOURCES $CDC api pubannotation paconvert udpipe stanford"
 
-function start() {
+function start_datasource() {
 	port=$1
 	name=$2
 	dir=$3
 	
 	docker run -d -p $port:8080 --name $name -v $dir:$target $image
+}
+
+function start() {
+	container$1
+	name=$2
+	port=$3
+	
+	docker run -d -p $port:8080 --name $name $container
 }
 
 function start_cdc() {
@@ -60,13 +69,13 @@ function start_api() {
 	docker run -d -p $API_PORT:8080 --name api -v $etc_lapps:/etc/lapps $api
 }
 
-function start_pubannotation() {
-	docker run -d -p $PUBANNOTATION_PORT:8080 --name pubannotation $pubannotation
-}
+#function start_pubannotation() {
+#	docker run -d -p $PUBANNOTATION_PORT:8080 --name pubannotation $pubannotation
+#}
 
-function start_udpipe() {
-	docker run -d -p $UDPIPE_PORT:8080 --name udpipe $udpipe
-}
+#function start_udpipe() {
+#	docker run -d -p $UDPIPE_PORT:8080 --name udpipe $udpipe
+#}
 
 #function start_vaers() {
 #    docker run -d -p 8086:8080 --name vaers $vaers
@@ -76,19 +85,24 @@ function start_udpipe() {
 #    docker run -d -p 8087:8080 --name ctakes $ctakes
 #}
 
-function start_paconvert() {
-	docker run -d -p $PACONVERT_PORT:8080 --name paconvert $paconvert
-}
+#function start_paconvert() {
+#	docker run -d -p $PACONVERT_PORT:8080 --name paconvert $paconvert
+#}
 
 function start_all() {
-	start DATA_COREF_PORT coref $coref
-	start DATA_REFERENCE_PORT reference $reference
-	start DATA_PROTEINS_PORT proteins $proteins
-	start DATA_SEMEVAL_PORT semeval $semeval
+	start_datasource $DATA_COREF_PORT coref $coref
+	start_datasource $DATA_REFERENCE_PORT reference $reference
+	start_datasource $DATA_PROTEINS_PORT proteins $proteins
+	start_datasource $DATA_SEMEVAL_PORT semeval $semeval
 	start_api
-	start_pubannotation
-	start_paconvert
-	start_udpipe
+	#start_pubannotation
+	#start_paconvert
+	#start_udpipe
+	start $pubannotation pubannotation $PUBANNOTATION_PORT
+	start $udpipe udpipe $UDPIPE_PORT
+	start $paconvert paconvert $PACONVERT_PORT
+	start $stanford stanford $STANFORD_PORT
+	
 	#start_cdc 8086 vaers
 	#start_cdc 8087 ctakes
 	#start_cdc 8088 xcas
@@ -110,25 +124,27 @@ case $1 in
     			start_all
 				;;
 			coref)
-				start $DATA_COREF_PORT coref $coref
+				start_datasource $DATA_COREF_PORT coref $coref
 				;;
 			reference)
-				start $DATA_REFERENCE_PORT reference $reference
+				start_datasource $DATA_REFERENCE_PORT reference $reference
 				;;
 			proteins)
-				start $DATA_PROTEINS_PORT proteins $proteins
+				start_datasource $DATA_PROTEINS_PORT proteins $proteins
 				;;
 			semeval)
-				start $DATA_SEMEVAL_PORT semeval $semeval
+				start_datasource $DATA_SEMEVAL_PORT semeval $semeval
 				;;
 			api)
 				start_api
 				;;
 			pubannotation)
-				start_pubannotation
+				#start_pubannotation
+				start $pubannotation pubannotation $PUBANNOTATION_PORT
 				;;
 			paconvert)
-				start_paconvert
+				#start_paconvert
+				start $paconver paconvert $PACONVERT_PORT
 				;;
 	        clinical) 
 		        start_cdc $CTAKES_CLINICAL_PORT ctakes-clinical
@@ -149,8 +165,11 @@ case $1 in
 				start_cdc $UIMA2LIF_PORT uima2lif
 				;;
 			udpipe)
-				start_udpipe
-
+				#start_udpipe
+				start $udpipe udpipe $UDPIPE_PORT
+				;;
+			stanford)
+				start $stanford stanford $STANFORD_PORT
 				;;
 			*)
 				echo "Invalid image name: $2"
@@ -163,7 +182,7 @@ case $1 in
 					stop $image
 				done
 				;;
-			coref|reference|proteins|semeval|api|pubannotation|ncbo|ethernlp|ethernlp-service|uima2lif|paconvert|udpipe)
+			coref|reference|proteins|semeval|api|pubannotation|ncbo|ethernlp|ethernlp-service|uima2lif|paconvert|udpipe|stanford)
 				stop $2
 				;;
 			clinical|temporal)
@@ -187,6 +206,7 @@ case $1 in
 				docker pull $vaers
 				docker pull $uima2lif
 				docker pull $udpipe
+				docker pull $stanford
 				start_all
 				;;	
 			coref)
@@ -217,12 +237,12 @@ case $1 in
 			pubannotation)
 				stop $2
 				docker pull $pubannotation
-				start_pubannotation
+				start $pubannotation pubannotation $PUBANNOTATION_PORT
 				;;
 			paconvert)
 				stop $2
 				docker pull $paconvert
-				start_paconvert
+				start $paconvert paconvert $PACONVERT_PORT
 				;;
 		    clinical)
 		        stop ctakes-$2
@@ -257,7 +277,12 @@ case $1 in
 			udpipe)
 				stop $2
 				docker pull $udpipe
-				start_udpipe
+				start $udpipe udpipe $UDPIPE_PORT
+				;;
+			stanford)
+				stop $2
+				docker pull $stanford
+				start $stanford stanford $STANFORD_PORT
 				;;
 			*)
 				echo "Unknow repository $2"
