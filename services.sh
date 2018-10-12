@@ -23,7 +23,7 @@ paconvert=docker.lappsgrid.org/lappsgrid/pubannotation-converter
 vaers=docker.lappsgrid.org/cdc/vaers
 ctakes=docker.lappsgrid.org/cdc/ctakes
 uima2lif=docker.lappsgrid.org/cdc/uima2lif
-udpipe=docker.lappsgrid.org/lappsgrid/udpipe
+udpipe=docker.lappsgrid.org/lappsgrid/udpipe:1.0.0
 stanford=docker.lappsgrid.org/lappsgrid/stanford:gdd
 
 # Directory configuration
