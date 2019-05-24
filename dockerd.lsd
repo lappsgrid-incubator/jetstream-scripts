@@ -1,0 +1,120 @@
+#!/usr/bin/env lsd
+
+SERVER="https://docker.lappsgrid.org"
+API="$SERVER/v2"
+CATALOG="$API/_catalog"
+
+//Map result = get(CATALOG)
+//result.repositories.each { println it }
+
+String cmd = args[0]
+if (cmd == null) {
+	catalog()
+	return
+}
+
+switch(cmd) {
+	case 'raw':
+		raw()
+		break
+	case 'catalog':
+		catalog()
+		break
+	case 'list':
+		list(args[1])
+		break
+	default:
+		println "Unrecognized command: $cmd"
+		break
+}
+
+return
+
+void raw() {
+	Map data = GET(CATALOG)
+	if (data == null) {
+		return
+	}
+	data.repositories.each { println it }
+	//println Serializer.toPrettyJson(data)	
+}
+
+void list(String repo) {
+	//Map result = get(CATALOG)
+	if (repo == null) {
+		println "Please provide a repository name"
+		return
+	}
+	println "Listing $repo"
+	Map listing = GET("$API/$repo/tags/list")
+	if (listing == null) {
+		println "No such repository: $repo"
+		return
+	}
+	println listing.name
+	listing.tags.each { println it}
+}
+
+void catalog() {
+	println "Getting catalog"
+	Map result = GET(CATALOG)
+	if (result == null) {
+		println "Unable to retrieve the catalog from $CATALOG"
+		return
+	}
+	Map repos = [:]
+	result.repositories.each { 
+		def parts = it.split('/')
+		String org = parts[0]
+		String name = parts[1..-1].join('/')
+		println "ORG: $org NAME: $name"
+		Repository repo = repos[org]
+		if (repo == null) {
+			repo = new Repository()
+			repo.name = org
+			repo.modules = []
+			repos[org] = repo
+		}
+		repo.modules.add(name)
+	}
+	int count = 0
+	repos.each { name,repo ->
+		println "${++count}. $name"
+		repo.modules.each {
+			String tags = getTags(name, it)
+			println "    $it [$tags]"
+		}
+	}
+	return
+}
+
+Map GET(String url) {
+	//println "GET $url"
+	String json = null
+	try {
+		json = new URL(url).text
+	}
+	catch (Exception e) {
+		println e.message
+		return null
+	}
+	
+	if (json.startsWith('404')) {
+		println json
+		return null
+	}
+	return Serializer.parse(json, HashMap)	
+}
+
+String getTags(String org, String name) {
+	Map listing = GET("$API/$org/$name/tags/list")
+	if (listing == null) {
+		return ""
+	}
+	return listing.tags.join(", ")
+}
+
+class Repository {
+	String name
+	List<String> modules
+}
