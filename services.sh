@@ -16,7 +16,7 @@ fi
 source ports.sh
 
 # Images used
-api=lappsgrid/api-service:latest
+api=docker.lappsgrid.org/lappsgrid/api-service:latest
 image=lappsgrid/generic-datasource:1.2.1
 pubannotation=docker.lappsgrid.org/lappsgrid/pubannotation
 paconvert=docker.lappsgrid.org/lappsgrid/pubannotation-converter
