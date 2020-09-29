@@ -27,7 +27,7 @@ elif [[ $OS == *ubuntu* ]] ; then
 	sudo apt-get update
 	sudo apt-get install -y postgresql-9.6 postgresql-contrib-9.6
 else
-	echo "Unrecognized Linux flavor."
+	echo "Unrecognized Linux flavor. Unable to install Postgres"
 	exit 1
 fi
 
@@ -48,7 +48,10 @@ elif [[ $OS = redhat6 ]] ; then
     service postgresql-9.6 initdb
     chkconfig postgresql-9.6 on
     service postgresql-9.6 start
-elif [[ $OS = ubuntu ]] ; then 
+elif [[ $OS == *ubuntu* ]] ; then 
     service postgresql start
+else
+	echo "Unrecognized Linux flavor. Unable to start Postgres service"
+	exit 1
 fi
 
