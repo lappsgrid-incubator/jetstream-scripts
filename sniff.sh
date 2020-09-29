@@ -1,7 +1,11 @@
 # This file should be sourced by other install scripts that need to determine
 # the flavor of Linux they are running on.
 
-if [[ `cat /etc/*-release | grep -i ubuntu` ]] ; then 
+if [[ `cat /etc/os-release | grep -i "ubuntu 20"` ]] ; then
+    OS="ubuntu20"
+elif [[ `cat /etc/os-release | grep -i "ubuntu 18"` ]] ; then
+    OS="ubuntu18"
+elif [[ `cat /etc/*-release | grep -i ubuntu` ]] ; then 
     OS="ubuntu"
 elif [[ -e /etc/centos-release ]] ; then 
     OS="centos"
