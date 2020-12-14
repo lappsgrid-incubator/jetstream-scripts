@@ -22,7 +22,7 @@ curl -sSL http://downloads.lappsgrid.org/scripts/install-lsd.sh | bash
 set -e
 
 # Install Galaxy (checkout from GitHub).
-if [[ $OS = ubuntu ]] ; then
+if [[ $OS = ubuntu* ]] ; then
 	adduser galaxy --system --group
 elif [[ $OS = redhat* || $OS = centos ]] ; then
 	adduser --system galaxy
