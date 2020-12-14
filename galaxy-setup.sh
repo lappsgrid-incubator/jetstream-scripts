@@ -27,7 +27,7 @@ if [[ $OS = ubuntu* ]] ; then
 elif [[ $OS = redhat* || $OS = centos ]] ; then
 	adduser --system galaxy
 else
-	echo "Unknown Linux flavor: $OS"
+	echo "Unable to create Galaxy user. Unknown Linux flavor: $OS"
 	exit 1
 fi
 
