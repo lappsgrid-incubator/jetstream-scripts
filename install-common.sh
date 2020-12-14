@@ -11,7 +11,8 @@ if [[ $OS = redhat* || $OS = centos ]] ; then
 	install="yum install -y"
 	common="$common emacs-nox.x86_64"
 elif [[ $OS = ubuntu20 || $OS = ubuntu18 ]] ; then
-    install="DEBIAN_FRONTEND=\"noninteractive\" apt install -y"
+    #install="DEBIAN_FRONTEND=\"noninteractive\" apt install -y"
+    install="apt install -y"
     common="$common emacs lsb-release gnupg"
 elif [[ $OS = ubuntu ]] ; then
 	install="apt-get install -y"
