@@ -25,7 +25,7 @@ elif [[ $OS == *ubuntu* ]] ; then
 	wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | sudo apt-key add -
 
 	sudo apt-get update
-	sudo apt-get install -y postgresql-9.6 postgresql-contrib-9.6
+	sudo apt-get install -y -q postgresql-9.6 postgresql-contrib-9.6
 else
 	echo "Unrecognized Linux flavor. Unable to install Postgres"
 	exit 1
